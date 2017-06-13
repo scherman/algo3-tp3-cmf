@@ -1,9 +1,10 @@
 //
-// Created by jscherman on 13/06/17.
+// Created by jscherman on 24/05/17.
 //
 
 #ifndef ALGO3_TP3_CMF_DISJOINTSET_H
 #define ALGO3_TP3_CMF_DISJOINTSET_H
+
 
 #include "Eje.h"
 #include <list>
@@ -69,7 +70,7 @@ public:
         Subset &destSet = find(eje.destino);
 
         if (srcSet.rank > destSet.rank) {
-            if (srcSet.parent != destSet.parent) {
+            if (srcSet.parent != destSet.parent){
                 srcSet.size += destSet.size;
                 srcSet.edges.splice(srcSet.edges.begin(), destSet.edges);
                 destSet.parent = srcSet.parent;
@@ -126,6 +127,4 @@ private:
 };
 
 
-#ifndef ALGO3_TP2_RUTAS_DISJOINTSET_H
-#define ALGO3_TP2_RUTAS_DISJOINTSET_H
-
+#endif //ALGO3_TP3_CMF_DISJOINTSET_H
