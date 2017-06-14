@@ -15,29 +15,34 @@ class DisjointSet {
 public:
 
     struct Subset {
-        int parent;
-        std::list<Eje> edges;
+        int representante;
+        int cantEjes;
         int rank;
-        int size;
+        std::list<int> nodos;
+
+        bool esClique(){
+            return cantEjes == ((nodos.size()*(nodos.size()-1))/2);
+        }
 
         friend std::ostream& operator<<(std::ostream& os, const Subset& s){
-            os << "[Subset] parent: " << s.parent << ", rank: " << s.rank << ", size: " << s.size << ", edges: ";
-            for (std::list<Eje>::const_iterator it = s.edges.begin(); it != s.edges.end(); it++) {
+            os << "[Subset] representante: " << s.representante << ", rank: " << s.rank << ", cantEjes: " << s.cantEjes << ", nodos: { ";
+            for (std::list<int>::const_iterator it = s.nodos.begin(); it != s.nodos.end(); ++it) {
                 os << *it << " ";
             }
+            os << "}";
             return os;
         }
 
         bool operator==(const Subset& s){
-            return parent == s.parent;
+            return representante == s.representante;
         }
 
         bool operator!=(const Subset& s){
-            return parent != s.parent;
+            return representante != s.representante;
         }
     };
 
-    DisjointSet(int n) : totalSize(n) {
+    DisjointSet(int n) : cantNodos(n) {
         subsets = new Subset*[n]();
         for (int i = 0; i < n; ++i) {
             makeSet(i);
@@ -45,7 +50,7 @@ public:
     };
 
     ~DisjointSet(){
-        for (int i = 0; i < totalSize; ++i) {
+        for (int i = 0; i < cantNodos; ++i) {
             delete subsets[i];
         }
         delete[] subsets;
@@ -55,14 +60,15 @@ public:
 
     void makeSet(int v) {
         subsets[v] = new Subset();
-        subsets[v]->parent = v;
+        subsets[v]->representante = v;
         subsets[v]->rank = 0;
-        subsets[v]->size = 1;
+        subsets[v]->nodos = std::list<int>();
+        subsets[v]->cantEjes = 0;
     }
 
     Subset & find(int v) const {
-        if (subsets[v]->parent == v) return *subsets[v];
-        else find(subsets[v]->parent);
+        if (subsets[v]->representante == v) return *subsets[v];
+        else find(subsets[v]->representante);
     }
 
     void unify(const Eje & eje) {
@@ -70,39 +76,39 @@ public:
         Subset &destSet = find(eje.destino);
 
         if (srcSet.rank > destSet.rank) {
-            if (srcSet.parent != destSet.parent){
-                srcSet.size += destSet.size;
-                srcSet.edges.splice(srcSet.edges.begin(), destSet.edges);
-                destSet.parent = srcSet.parent;
+            if (srcSet.representante != destSet.representante){
+                srcSet.nodos.splice(srcSet.nodos.begin(), destSet.nodos);
+                srcSet.cantEjes += destSet.cantEjes;
+                destSet.representante = srcSet.representante;
             }
-            srcSet.edges.push_back(eje);
+            srcSet.cantEjes++;
         } else if (srcSet.rank < destSet.rank) {
-            if (srcSet.parent != destSet.parent){
-                destSet.size += srcSet.size;
-                destSet.edges.splice(destSet.edges.begin(), srcSet.edges);
-                srcSet.parent = destSet.parent;
+            if (srcSet.representante != destSet.representante){
+                destSet.nodos.splice(destSet.nodos.begin(), srcSet.nodos);
+                destSet.cantEjes += srcSet.cantEjes;
+                srcSet.representante = destSet.representante;
             }
-            destSet.edges.push_back(eje);
+            destSet.cantEjes++;
         } else {
-            if (srcSet.parent != destSet.parent){
-                destSet.size += srcSet.size;
-                destSet.edges.splice(destSet.edges.begin(), srcSet.edges);
-                srcSet.parent = destSet.parent;
+            if (srcSet.representante != destSet.representante){
+                destSet.nodos.splice(destSet.nodos.begin(), srcSet.nodos);
+                destSet.cantEjes += srcSet.cantEjes;
+                srcSet.representante = destSet.representante;
                 destSet.rank++;
             }
-            destSet.edges.push_back(eje);
+            destSet.cantEjes++;
         }
         totalEdges.push_back(eje);
     };
 
     std::list<Subset*> sets() const {
-        bool seen [totalSize] = {false};
+        bool seen [cantNodos] = {false};
 
         std::list<Subset*> ss;
-        for (int i = 0; i < totalSize; ++i) {
+        for (int i = 0; i < cantNodos; ++i) {
             Subset &subset = find(i);
-            if (!seen[subset.parent]) {
-                seen[subset.parent] = true;
+            if (!seen[subset.representante]) {
+                seen[subset.representante] = true;
                 ss.push_back(&subset);
             }
         }
@@ -111,7 +117,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const DisjointSet& d){
         std::list<Subset*> subsets = d.sets();
-        os << "[DisjointSet] totalSize: "<< d.totalSize << ", " << subsets.size() << " subsets: " << std::endl;
+        os << "[DisjointSet] cantNodos: "<< d.cantNodos << ", " << subsets.size() << " subsets: " << std::endl;
         for (std::list<Subset*>::const_iterator it = subsets.begin(); it != subsets.end(); it++) {
             os << "--> " << **it << std::endl;
         }
@@ -120,7 +126,7 @@ public:
 
 private:
 
-    int totalSize;
+    int cantNodos;
     std::list<Eje> totalEdges;
     Subset ** subsets;
 
