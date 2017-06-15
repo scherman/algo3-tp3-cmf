@@ -16,7 +16,7 @@ Clique * filtrarPeorClique(Clique *cliqueA, Clique *cliqueB) {
     }
 }
 
-int calcularFrontera(const std::list<int> &nodos, std::list<int> * listaAdyacencias){
+int calcularFrontera(const std::list<int> &nodos, std::list<int> listaAdyacencias[]){
     int frontera = -(nodos.size() * (nodos.size() - 1));
     for (std::list<int>::const_iterator it = nodos.begin(); it != nodos.end(); ++it) {
         frontera += listaAdyacencias[*it].size();
@@ -31,32 +31,28 @@ void imprimirEjes(std::list<Eje> & ejes) {
 }
 
 
-Clique * cmf(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> *listaAdyacencias, int &cliquesEncontradas){
+Clique * cmf(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> listaAdyacencias[] ){
     if (ejesNoAgregados.size() == 0) {
+        // m=0 => Todos los vertices son aislados (o sea G=nK1). Como n>=1, tomamos a la clique K1 = 0 con la frontera 0 (porque no hay ejes)
         std::list<int> V;
         V.push_back(0);
         return new Clique(V, 0);
     } else {
+        Clique *cmfMax = nullptr;
+
         Eje e = ejesNoAgregados.front();
         ejesNoAgregados.pop_front();
 
+        // Ver si la componente conexa que forma e es una clique.
         DisjointSet udsConE = DisjointSet(uds);
-
         DisjointSet::Subset unionSets = udsConE.unify(e);
-        Clique *cmfMax = nullptr;
         if (unionSets.esClique()) {
-            int fronteraNuevaClique = calcularFrontera(unionSets.nodos, listaAdyacencias);
-//            std:: cout << cliquesEncontradas++ << ") Frontera " << fronteraNuevaClique << ": ";
-//            for (std::list<int>::const_iterator it = unionSets.nodos.begin(); it != unionSets.nodos.end(); ++it) {
-//                std::cout << *it << " ";
-//            }
-//            std::cout << std::endl;
-            std::list<int> &nodosNuevaClique = unionSets.nodos;
-            cmfMax = new Clique(nodosNuevaClique, fronteraNuevaClique);
+            cmfMax = new Clique(unionSets.nodos, calcularFrontera(unionSets.nodos, listaAdyacencias));
         }
 
-        Clique *cmfConE = cmf(udsConE, ejesNoAgregados, listaAdyacencias, cliquesEncontradas);
-        Clique *cmfSinE = cmf(uds, ejesNoAgregados, listaAdyacencias, cliquesEncontradas);
+        // Llamadas a las 2 ramas (con y sin e respectivamente)
+        Clique *cmfConE = cmf(udsConE, ejesNoAgregados, listaAdyacencias);
+        Clique *cmfSinE = cmf(uds, ejesNoAgregados, listaAdyacencias);
 
         // Filtrar clique max
         cmfMax = cmfMax != nullptr ? filtrarPeorClique(cmfConE, cmfMax) : cmfConE;
@@ -87,19 +83,18 @@ int main(int argc, char** argv) {
             listaAdyacencias[v1].push_back(v2);
             listaAdyacencias[v2].push_back(v1);
             listaIncidencias.push_back({v1,v2});
-
         }
         DisjointSet uds = DisjointSet(n);
-        std::cout << "n=" << n << ", m=" << m << ", E={ ";
-        imprimirEjes(listaIncidencias);
-        std::cout << "}" << std::endl;
-        int cliques = 0;
-		Clique *cliqueMax = cmf(uds, listaIncidencias, listaAdyacencias, cliques);
-        std::cout << "CMF: [frontera= " << cliqueMax->frontera << ", nodos={ ";
+		Clique *cliqueMax = cmf(uds, listaIncidencias, listaAdyacencias);
+
+        // Output
+        std::cout << cliqueMax->frontera << " " << cliqueMax->vertices.size();
         for (std::list<int>::const_iterator it = cliqueMax->vertices.begin(); it != cliqueMax->vertices.end(); ++it) {
-            std::cout << *it << " ";
+            std::cout << " " << *it ;
         }
-        std:: cout << "} ] "<< std::endl;
+        std::cout << std::endl;
+
+
         delete cliqueMax;
 	}
 	input.close();
