@@ -7,7 +7,7 @@
 #include <fstream>
 
 Clique * filtrarPeorClique(Clique *cliqueA, Clique *cliqueB) {
-    if (cliqueA->frontera >= cliqueA->frontera) {
+    if (cliqueA->frontera >= cliqueB->frontera) {
         delete cliqueB;
         return cliqueA;
     } else {
@@ -16,44 +16,47 @@ Clique * filtrarPeorClique(Clique *cliqueA, Clique *cliqueB) {
     }
 }
 
-int calcularFrontera(const DisjointSet::Subset &set, std::list<int> * listaAdyacencias){
-    int frontera = set.nodos.size() * (set.nodos.size() - 1);
-    for (std::list<int>::const_iterator it = set.nodos.begin(); it != set.nodos.end(); ++it) {
+int calcularFrontera(const std::list<int> &nodos, std::list<int> * listaAdyacencias){
+    int frontera = -(nodos.size() * (nodos.size() - 1));
+    for (std::list<int>::const_iterator it = nodos.begin(); it != nodos.end(); ++it) {
         frontera += listaAdyacencias[*it].size();
+    }
+    return frontera;
+}
+
+void imprimirEjes(std::list<Eje> & ejes) {
+    for (std::list<Eje>::iterator it = ejes.begin(); it != ejes.end(); ++it) {
+        std::cout << *it << " ";
     }
 }
 
-Clique * cmf(DisjointSet &uds, std::list<Eje> &ejesNoAgregados, std::list<int> *listaAdyacencias){
+
+Clique * cmf(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> *listaAdyacencias, int &cliquesEncontradas){
     if (ejesNoAgregados.size() == 0) {
         std::list<int> V;
         V.push_back(0);
         return new Clique(V, 0);
-    } else if (ejesNoAgregados.size() == 1) {
-        Eje &e = ejesNoAgregados.front();
-        ejesNoAgregados.pop_front();
-
-        std::list<int> V;
-        V.push_back(e.origen);
-        V.push_back(e.destino);
-
-        return new Clique(V, 0);
     } else {
-        Eje &e = ejesNoAgregados.front();
+        Eje e = ejesNoAgregados.front();
         ejesNoAgregados.pop_front();
 
         DisjointSet udsConE = DisjointSet(uds);
-        udsConE.unify(e);
 
-        DisjointSet::Subset nuevoSet = uds.find(e.origen);
+        DisjointSet::Subset unionSets = udsConE.unify(e);
         Clique *cmfMax = nullptr;
-        if (nuevoSet.esClique()) {
-            int fronteraNuevaClique = calcularFrontera(nuevoSet, listaAdyacencias);
-            std::list<int> &nodosNuevaClique = nuevoSet.nodos;
+        if (unionSets.esClique()) {
+            int fronteraNuevaClique = calcularFrontera(unionSets.nodos, listaAdyacencias);
+//            std:: cout << cliquesEncontradas++ << ") Frontera " << fronteraNuevaClique << ": ";
+//            for (std::list<int>::const_iterator it = unionSets.nodos.begin(); it != unionSets.nodos.end(); ++it) {
+//                std::cout << *it << " ";
+//            }
+//            std::cout << std::endl;
+            std::list<int> &nodosNuevaClique = unionSets.nodos;
             cmfMax = new Clique(nodosNuevaClique, fronteraNuevaClique);
         }
 
-        Clique *cmfConE = cmf(udsConE, ejesNoAgregados, listaAdyacencias);
-        Clique *cmfSinE = cmf(uds, ejesNoAgregados, listaAdyacencias);
+        Clique *cmfConE = cmf(udsConE, ejesNoAgregados, listaAdyacencias, cliquesEncontradas);
+        Clique *cmfSinE = cmf(uds, ejesNoAgregados, listaAdyacencias, cliquesEncontradas);
 
         // Filtrar clique max
         cmfMax = cmfMax != nullptr ? filtrarPeorClique(cmfConE, cmfMax) : cmfConE;
@@ -75,8 +78,8 @@ int main(int argc, char** argv) {
         std::list<int> listaAdyacencias[n];
         std::list<Eje> listaIncidencias;
         int c = 0;
-        for(int i = 0; i < m; i++){
-            int v1, v2, p;
+        for(int i = 0; i <= m; i++){
+            int v1, v2;
             getline(input, linea);
             strTok.tokenize(linea, ' ');
             v1 = stoi(strTok[0]);
@@ -87,8 +90,16 @@ int main(int argc, char** argv) {
 
         }
         DisjointSet uds = DisjointSet(n);
-		Clique *cliqueMax = cmf(uds, listaIncidencias, listaAdyacencias);
-        std::cout << "CMF: " << cliqueMax->frontera << std::endl;
+        std::cout << "n=" << n << ", m=" << m << ", E={ ";
+        imprimirEjes(listaIncidencias);
+        std::cout << "}" << std::endl;
+        int cliques = 0;
+		Clique *cliqueMax = cmf(uds, listaIncidencias, listaAdyacencias, cliques);
+        std::cout << "CMF: [frontera= " << cliqueMax->frontera << ", nodos={ ";
+        for (std::list<int>::const_iterator it = cliqueMax->vertices.begin(); it != cliqueMax->vertices.end(); ++it) {
+            std::cout << *it << " ";
+        }
+        std:: cout << "} ] "<< std::endl;
         delete cliqueMax;
 	}
 	input.close();
