@@ -3,5 +3,7 @@ project(algo3_tp3_cmf)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES cmf-algo-exacto.cpp DisjointSet.h Eje.h Clique.h cmf-heuristica-constructiva-golosa.cpp)
-add_executable(algo3_tp3_cmf ${SOURCE_FILES})
+set(SOURCE_FILES_1 cmf-algo-exacto.cpp DisjointSet.h Eje.h Clique.h)
+set(SOURCE_FILES_2 cmf-heuristica-constructiva-golosa.cpp DisjointSet.h Eje.h Clique.h)
+add_executable(exacto ${SOURCE_FILES_1})
+add_executable(hconstructiva ${SOURCE_FILES_2})

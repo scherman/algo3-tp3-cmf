@@ -38,17 +38,17 @@ int main(int argc, char** argv) {
             listaIncidencias.push_back({v1,v2});
         }
         DisjointSet uds = DisjointSet(n);
-        Clique *cliqueMax = cmf(uds, listaIncidencias, listaAdyacencias);
+//        Clique *cliqueMax = cmf(uds, listaIncidencias, listaAdyacencias);
 
-        // Output
-        std::cout << cliqueMax->frontera << " " << cliqueMax->vertices.size();
-        for (std::list<int>::const_iterator it = cliqueMax->vertices.begin(); it != cliqueMax->vertices.end(); ++it) {
-            std::cout << " " << *it ;
-        }
-        std::cout << std::endl;
+//         Output
+//        std::cout << cliqueMax->frontera << " " << cliqueMax->vertices.size();
+//        for (std::list<int>::const_iterator it = cliqueMax->vertices.begin(); it != cliqueMax->vertices.end(); ++it) {
+//            std::cout << " " << *it ;
+//        }
+//        std::cout << std::endl;
 
 
-        delete cliqueMax;
+//        delete cliqueMax;
     }
     input.close();
     return 0;

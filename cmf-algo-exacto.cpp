@@ -54,7 +54,7 @@ Clique * cmf(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> li
         Clique *cmfConE = cmf(udsConE, ejesNoAgregados, listaAdyacencias);
         Clique *cmfSinE = cmf(uds, ejesNoAgregados, listaAdyacencias);
 
-        // Filtrar clique max
+        // Filtrar entre la mejor clique entre cmfConE, cmfSinE, cmfMax
         cmfMax = cmfMax != nullptr ? filtrarPeorClique(cmfConE, cmfMax) : cmfConE;
         cmfMax = filtrarPeorClique(cmfMax, cmfSinE);
         return cmfMax;
