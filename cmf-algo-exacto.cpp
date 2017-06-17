@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
         std::list<int> listaAdyacencias[n];
         std::list<Eje> listaIncidencias;
         int c = 0;
-        for(int i = 0; i <= m; i++){
+        for(int i = 0; i < m; i++){
             int v1, v2;
             getline(input, linea);
             strTok.tokenize(linea, ' ');
