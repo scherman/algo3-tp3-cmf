@@ -4,6 +4,7 @@
 #include "DisjointSet.h"
 #include <list>
 #include "stringTokenizer.hpp"
+#include "Utils.h"
 #include <fstream>
 
 Clique * filtrarPeorClique(Clique *cliqueA, Clique *cliqueB) {
@@ -23,13 +24,6 @@ int calcularFrontera(const std::list<int> &nodos, std::list<int> listaAdyacencia
     }
     return frontera;
 }
-
-void imprimirEjes(std::list<Eje> & ejes) {
-    for (std::list<Eje>::iterator it = ejes.begin(); it != ejes.end(); ++it) {
-        std::cout << *it << " ";
-    }
-}
-
 
 Clique * cmf(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> listaAdyacencias[] ){
     if (ejesNoAgregados.size() == 0) {
