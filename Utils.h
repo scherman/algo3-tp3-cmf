@@ -19,6 +19,16 @@ public:
         }
     }
 
+    static void imprimirMatrizAdyacencias(int n, bool **matrizAdyacencias) {
+        for (int k = 0; k < n; ++k) {
+            for (int i = 0; i < n; ++i) {
+                std::cout << matrizAdyacencias[k][i] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
     // Devuelve matriz de adyacencia y de incidencias
     static std::list<Eje> generarGrafo(int n, int m, bool conexo, int pesoMin, int pesoMax) {
         if (m > (n*(n-1))/2) throw std::invalid_argument( "No puede tener tantos ejes!");

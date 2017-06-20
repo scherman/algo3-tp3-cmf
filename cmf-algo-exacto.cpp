@@ -1,11 +1,11 @@
+
 #include <iostream>
 #include "Clique.h"
 #include "Eje.h"
 #include "DisjointSet.h"
-#include <list>
-#include "stringTokenizer.hpp"
 #include "Utils.h"
 #include <fstream>
+#include "stringTokenizer.hpp"
 
 Clique * filtrarPeorClique(Clique *cliqueA, Clique *cliqueB) {
     if (cliqueA->frontera >= cliqueB->frontera) {
@@ -25,7 +25,7 @@ int calcularFrontera(const std::list<int> &nodos, std::list<int> listaAdyacencia
     return frontera;
 }
 
-Clique * cmf(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> listaAdyacencias[] ){
+Clique * cmfExacto(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> *listaAdyacencias){
     if (ejesNoAgregados.size() == 0) {
         // m=0 => Todos los vertices son aislados (o sea G=nK1). Como n>=1, tomamos a la clique K1 = 0 con la frontera 0 (porque no hay ejes)
         std::list<int> V;
@@ -45,8 +45,8 @@ Clique * cmf(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> li
         }
 
         // Llamadas a las 2 ramas (con y sin e respectivamente)
-        Clique *cmfConE = cmf(udsConE, ejesNoAgregados, listaAdyacencias);
-        Clique *cmfSinE = cmf(uds, ejesNoAgregados, listaAdyacencias);
+        Clique *cmfConE = cmfExacto(udsConE, ejesNoAgregados, listaAdyacencias);
+        Clique *cmfSinE = cmfExacto(uds, ejesNoAgregados, listaAdyacencias);
 
         // Filtrar entre la mejor clique entre cmfConE, cmfSinE, cmfMax
         cmfMax = cmfMax != nullptr ? filtrarPeorClique(cmfConE, cmfMax) : cmfConE;
@@ -54,6 +54,28 @@ Clique * cmf(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> li
         return cmfMax;
     }
 }
+
+Clique * cmfExacto(int n, int m, std::list<Eje> &listaIncidencias) {
+    std::list<int> listaAdyacencias[n];
+    for (std::list<Eje>::iterator it = listaIncidencias.end(); it != listaIncidencias.end(); ++it) {
+        Eje &eje = *it;
+        listaAdyacencias[eje.origen].push_back(eje.destino);
+        listaAdyacencias[eje.destino].push_back(eje.origen);
+    }
+    DisjointSet uds = DisjointSet(n);
+    return cmfExacto(uds, listaIncidencias, listaAdyacencias);
+}
+
+//int main(int argc, char** argv) {
+//    int n = 5, m = 10;
+//    std::cout << "asd" << std::endl;
+//    std::list<Eje> grafo = Utils::generarGrafo(n, m, false, 0, 0);
+//    std::cout << "Exacto: " << cmfExacto(n, m, grafo) << std::endl;
+////    std::cout << "Constructiva: " << heuristicaConstructiva(n, grafo) << std::endl;
+//
+//    return 0;
+//}
+
 
 int main(int argc, char** argv) {
     unsigned n, m;
@@ -79,7 +101,7 @@ int main(int argc, char** argv) {
             listaIncidencias.push_back({v1,v2});
         }
         DisjointSet uds = DisjointSet(n);
-		Clique *cliqueMax = cmf(uds, listaIncidencias, listaAdyacencias);
+        Clique *cliqueMax = cmfExacto(uds, listaIncidencias, listaAdyacencias);
 
         // Output
         std::cout << cliqueMax->frontera << " " << cliqueMax->vertices.size();
@@ -90,10 +112,7 @@ int main(int argc, char** argv) {
 
 
         delete cliqueMax;
-	}
-	input.close();
+    }
+    input.close();
     return 0;
 }
-
-
-

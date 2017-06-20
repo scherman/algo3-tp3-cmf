@@ -7,25 +7,28 @@
 #include "Eje.h"
 #include "DisjointSet.h"
 #include <list>
-#include "stringTokenizer.hpp"
+#include "Utils.h"
 #include <fstream>
+#include "stringTokenizer.hpp"
 
 bool mejoraFrontera(Clique* clique, int vecino, std::list<int> listaAdyacencias[]) {
     int gradoVecino = listaAdyacencias[vecino].size();
-    return clique->frontera - clique->vertices.size() + gradoVecino >= clique->frontera;
+    return (clique->frontera - 2*clique->vertices.size() + gradoVecino) > clique->frontera;
 }
 
 bool extiendeClique(Clique* clique, int vecino, std::list<int> listaAdyacencias[]) {
     std::list<int> &adyacentesVecino = listaAdyacencias[vecino];
     std::list<int> &verticesClique = clique->vertices;
-    for (std::list<int>::const_iterator itAdyacentes = adyacentesVecino.begin(); itAdyacentes != adyacentesVecino.end(); ++itAdyacentes) {
-        int adyacenteVecino = *itAdyacentes;
-        bool estaEnClique = false;
-        for (std::list<int>::const_iterator itVClique = verticesClique.begin(); itVClique != verticesClique.end(); ++itVClique) {
-            int verticeClique = *itVClique;
-            if (verticeClique == adyacenteVecino) estaEnClique = true;
+
+    for (std::list<int>::const_iterator itVClique = verticesClique.begin(); itVClique != verticesClique.end(); ++itVClique) {
+        int verticeClique = *itVClique;
+        bool verticeCliqueIncideEnVecino = false;
+        for (std::list<int>::const_iterator itAdyacentes = adyacentesVecino.begin(); itAdyacentes != adyacentesVecino.end(); ++itAdyacentes) {
+            int adyacenteVecino = *itAdyacentes;
+
+            if (verticeClique == adyacenteVecino) verticeCliqueIncideEnVecino = true;
         }
-        if (!estaEnClique) return false;
+        if (!verticeCliqueIncideEnVecino) return false;
     }
     return true;
 }
@@ -34,10 +37,10 @@ void extenderClique (Clique* clique, int vecino, bool **matrizAdyacencias, std::
     for (std::list<int>::const_iterator itVClique = clique->vertices.begin(); itVClique != clique->vertices.end(); ++itVClique) {
         int verticeClique = *itVClique;
         matrizAdyacencias[verticeClique][vecino] = true;
-        matrizAdyacencias[vecino][verticeClique] = false;
+        matrizAdyacencias[vecino][verticeClique] = true;
     }
+    clique->frontera = clique->frontera - 2*clique->vertices.size() + listaAdyacencias[vecino].size();
     clique->vertices.push_back(vecino);
-    clique->frontera = clique->frontera - clique->vertices.size() + listaAdyacencias[vecino].size();
 }
 
 /*
@@ -48,7 +51,7 @@ void extenderClique (Clique* clique, int vecino, bool **matrizAdyacencias, std::
  * 3. Repetir 2 hasta que no haya adyacentes
  * 4. Devolver la clique con mayor frontera de la lista de cliques
  */
-Clique * hconstructiva(int n, std::list<int> listaAdyacencias[]){
+Clique hconstructiva(int n, std::list<int> *listaAdyacencias){
 
     // Busco nodo de mayor grado
     int actual = 0;
@@ -56,62 +59,88 @@ Clique * hconstructiva(int n, std::list<int> listaAdyacencias[]){
         actual = listaAdyacencias[i].size() > listaAdyacencias[actual].size() ? i : actual;
     }
 
+    Clique *cliques[n] = {nullptr};
+    std::list<int> V;
+    V.push_back(actual);
+    cliques[actual] = new Clique(V, listaAdyacencias[actual].size());
 
     bool **matrizAdyacencias= new bool*[n];
     for(int i = 0; i < n; ++i) {
         matrizAdyacencias[i] = new bool[n];
         for(int r = 0; r < n; ++r) {
-            if (i == r) {
-                matrizAdyacencias[i][r] = true;
-            } else {
-                matrizAdyacencias[i][r] = false;
-            }
+            matrizAdyacencias[i][r] = (i == r);
         }
     }
 
-    Clique *cliques[n] = {nullptr};
     while(actual != -1) {
         std::list<int> &adyacentes = listaAdyacencias[actual];
 
-        // Obtener vecino de mayor grado
-        int vecino = -1;
+        // Obtener vecinoDisponible de mayor grado
+        int vecinoDisponible = -1;
         for (std::list<int>::const_iterator it = adyacentes.begin(); it != adyacentes.end(); ++it) {
-            if(vecino == -1 || listaAdyacencias[vecino].size() < listaAdyacencias[*it].size()) {
-                vecino = *it;
+            if (matrizAdyacencias[*it][actual]) continue;
+            if (cliques[*it] != nullptr) continue;
+            if(vecinoDisponible == -1 || listaAdyacencias[vecinoDisponible].size() < listaAdyacencias[*it].size()) {
+                vecinoDisponible = *it;
             }
         }
-        if (vecino != -1) {
-            matrizAdyacencias[actual][vecino] = true;
-            matrizAdyacencias[vecino][actual] = true;
+
+        if (vecinoDisponible != -1) {
+            // Puedo agregar otro nodo
+            matrizAdyacencias[actual][vecinoDisponible] = true;
+            matrizAdyacencias[vecinoDisponible][actual] = true;
 
             Clique *cliqueActual = cliques[actual];
 
-            if (mejoraFrontera(cliqueActual, vecino, listaAdyacencias)
-                    && extiendeClique(cliqueActual, vecino, listaAdyacencias)) {
-                extenderClique(cliqueActual, vecino, matrizAdyacencias, listaAdyacencias);
+            if (mejoraFrontera(cliqueActual, vecinoDisponible, listaAdyacencias)
+                    && extiendeClique(cliqueActual, vecinoDisponible, listaAdyacencias)) {
+                // vecinoActual esta en la clique de actual y aumenta la frontera. Lo agrego a la clique
+                extenderClique(cliqueActual, vecinoDisponible, matrizAdyacencias, listaAdyacencias);
+                cliques[vecinoDisponible] = cliqueActual;
             } else {
-                // Le asigno nueva clique
+                // Le asigno una clique nueva
                 std::list<int> V;
-                V.push_back(vecino);
-                Clique *cliqueNueva = new Clique(V, listaAdyacencias[vecino].size());
-                cliques[vecino] = cliqueNueva;
+                V.push_back(vecinoDisponible);
+                Clique *cliqueNueva = new Clique(V, listaAdyacencias[vecinoDisponible].size());
+                cliques[vecinoDisponible] = cliqueNueva;
             }
         }
-        actual = vecino;
+        actual = vecinoDisponible;
     }
 
+    // Busco entre las cliques encontradas la que tenga mayor frontera
     Clique* maxClique = nullptr;
     for (int j = 0; j < n; ++j) {
+        if (cliques[j] == nullptr){
+            continue;
+        }  else {
+            std::cout << "v=" << j << ":" << *cliques[j] << std::endl;
+        }
         if (maxClique == nullptr || maxClique->frontera < cliques[j]->frontera) {
             maxClique = cliques[j];
         }
     }
-    return maxClique;
+
+    for(int i = 0; i < n; ++i) {
+        delete matrizAdyacencias[i];
+    }
+    delete[] matrizAdyacencias;
+
+    return *maxClique;
+}
+
+Clique heuristicaConstructiva(int n, std::list<Eje> &listaIncidencias) {
+    std::list<int> listaAdyacencias[n];
+    for (std::list<Eje>::iterator it = listaIncidencias.end(); it != listaIncidencias.end(); ++it) {
+        Eje &eje = *it;
+        listaAdyacencias[eje.origen].push_back(eje.destino);
+        listaAdyacencias[eje.destino].push_back(eje.origen);
+    }
+
+    return hconstructiva(n, listaAdyacencias);
 }
 
 int main(int argc, char** argv) {
-    std::cout << "hola" << std::endl;
-
     unsigned n, m;
     stringTokenizer strTok;
     string linea;
@@ -124,7 +153,7 @@ int main(int argc, char** argv) {
         std::list<int> listaAdyacencias[n];
         std::list<Eje> listaIncidencias;
         int c = 0;
-        for(int i = 0; i <= m; i++){
+        for(int i = 0; i < m; i++){
             int v1, v2;
             getline(input, linea);
             strTok.tokenize(linea, ' ');
@@ -134,8 +163,15 @@ int main(int argc, char** argv) {
             listaAdyacencias[v2].push_back(v1);
             listaIncidencias.push_back({v1,v2});
         }
-        DisjointSet uds = DisjointSet(n);
-        Clique *cliqueMax = hconstructiva(n, listaAdyacencias);
+        Clique cliqueMax = hconstructiva(n, listaAdyacencias);
+
+        // Output
+        std::cout << cliqueMax.frontera << " " << cliqueMax.vertices.size();
+        for (std::list<int>::const_iterator it = cliqueMax.vertices.begin(); it != cliqueMax.vertices.end(); ++it) {
+            std::cout << " " << *it ;
+        }
+
+        std::cout << std::endl;
     }
     input.close();
     return 0;

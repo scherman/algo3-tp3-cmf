@@ -1,12 +1,16 @@
-#include <string>
-#include <vector>
+#ifndef TEST_DEBUGGER_TOKENIZER
+#define TEST_DEBUGGER_TOKENIZER
 
+#include <string>
+
+#include <vector>
 using namespace std;
+
 
 
 class stringTokenizer{
 
-private:	
+private:
 	vector<string> tokens;
 
 public:
@@ -29,7 +33,7 @@ public:
 			initPos = ++pos;
 			pos = str.find(delimiter, initPos);
 		}while(pos != string::npos);
-		
+
 		if(initPos < str.length())
 			tokens.push_back(str.substr(initPos));
 	}
@@ -43,3 +47,6 @@ public:
 		return tokens.size();
 	}
 };
+
+
+#endif // TEST_DEBUGGER_TOKENIZER
