@@ -26,3 +26,15 @@ Clique & busquedaLocal(int n, Clique &clique, std::list<int> *grafoOriginal) {
     }
     return clique;
 }
+
+
+Clique &busquedaLocal2(int n, Clique &clique, std::list<Eje>& listaIncidencias){
+    std::list<int> listaAdyacencias[n];
+    for (std::list<Eje>::iterator it = listaIncidencias.begin(); it != listaIncidencias.end(); ++it) {
+        Eje &eje = *it;
+        listaAdyacencias[eje.origen].push_back(eje.destino);
+        listaAdyacencias[eje.destino].push_back(eje.origen);
+    }
+
+    return busquedaLocal(n, clique, listaAdyacencias);
+}

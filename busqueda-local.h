@@ -9,4 +9,7 @@
 
 Clique & busquedaLocal(int n, Clique &clique, std::list<int> *grafoOriginal);
 
+Clique & busquedaLocal2(int n, Clique &clique, std::list<Eje>& listaIncidencias);
+
+
 #endif //TEST_DEBUGGER_BUSQUEDA_LOCAL_H_H
