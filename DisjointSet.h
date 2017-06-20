@@ -89,8 +89,13 @@ public:
     }
 
     Subset & find(int v) const {
-        if (subsets[v]->representante == v) return *subsets[v];
-        else find(subsets[v]->representante);
+        if (subsets[v]->representante != v) {
+            Subset &subset = find(subsets[v]->representante);
+            subsets[v]->representante = subset.representante;
+            return subset;
+        } else {
+            return *subsets[v];
+        }
     }
 
     Subset& unify(const Eje & eje) {
