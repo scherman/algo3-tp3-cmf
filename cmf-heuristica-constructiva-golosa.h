@@ -14,13 +14,12 @@
 #include <fstream>
 #include "stringTokenizer.hpp"
 
-bool mejoraFrontera(Clique* clique, int vecino, std::list<int> listaAdyacencias[]);
+bool mejoraFrontera(Clique* clique, int vecino, std::vector<std::list<int>> listaAdyacencias);
 
-bool extiendeClique(Clique* clique, int vecino, std::list<int> listaAdyacencias[]);
+bool extiendeClique(Clique* clique, int vecino, std::vector<std::list<int>> listaAdyacencias);
 
-void extenderClique (Clique* clique, int vecino, bool **matrizAdyacencias, std::list<int> listaAdyacencias[]);
+void extenderClique (Clique* clique, int vecino, bool **matrizAdyacencias, std::vector<std::list<int>> listaAdyacencias);
 
-Clique hconstructiva(int n, std::list<int> *listaAdyacencias);
-Clique heuristicaConstructiva(int n, std::list<Eje> &listaIncidencias);
+Clique* hconstructiva(int n, std::vector<std::list<int>> listaAdyacencias, int nodoInicial);
 
 #endif //TEST_DEBUGGER_CMF_HEURISTICA_CONSTRUCTIVA_GOLOSA_H

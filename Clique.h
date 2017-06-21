@@ -11,10 +11,11 @@ struct Clique{
     int frontera;
     std::list<int> vertices;
 
+//    Clique() : frontera(0) {};
     Clique(std::list<int> vertices, int frontera) : frontera(frontera), vertices(vertices){};
 
     friend std::ostream& operator<<(std::ostream& os, const Clique& s){
-        os << "[Clique] frontera: " << s.frontera << ", nodos: { ";
+        os << "[Clique(" << &s << ")] frontera: " << s.frontera << ", nodos: { ";
         for (std::list<int>::const_iterator it = s.vertices.begin(); it != s.vertices.end(); ++it) {
             os << *it << " ";
         }

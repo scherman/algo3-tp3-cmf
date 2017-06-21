@@ -13,9 +13,19 @@
 class Utils {
 
 public:
-    static void imprimirEjes(std::list<Eje> & ejes) {
+    static void imprimirListaIncidencias(std::list<Eje> &ejes) {
         for (std::list<Eje>::iterator it = ejes.begin(); it != ejes.end(); ++it) {
             std::cout << *it << " ";
+        }
+    }
+
+    static void imprimirListaAdyacencias(int n, std::vector<std::list<int>> listaAdyacencias) {
+        for (int i = 0; i < n; ++i) {
+            std::cout << "N[" << i << "] = { ";
+            for (std::list<int>::iterator it = listaAdyacencias[i].begin(); it != listaAdyacencias[i].end(); ++it) {
+                std::cout << *it << " ";
+            }
+            std::cout <<  "}"<< std::endl;
         }
     }
 
@@ -29,8 +39,7 @@ public:
         std::cout << std::endl;
     }
 
-    // Devuelve matriz de adyacencia y de incidencias
-    static std::list<Eje> generarGrafo(int n, int m, bool conexo, int pesoMin, int pesoMax) {
+    static std::list<Eje> generarListaIncidencias(int n, int m, bool conexo, int pesoMin, int pesoMax) {
         if (m > (n*(n-1))/2) throw std::invalid_argument( "No puede tener tantos ejes!");
         if (conexo && m < n - 1) throw std::invalid_argument( "No puede ser conexo porque m < n - 1");
 
@@ -88,6 +97,17 @@ public:
         delete[] ejesAgregados;
 
         return rutasExistentes;
+    }
+
+    static std::vector<std::list<int>> generarListaAdyacencias(int n, int m, bool conexo, int pesoMin, int pesoMax) {
+        std::vector<std::list<int>> listaAdyacencias(n);
+        std::list<Eje> listaIncidencias = generarListaIncidencias(n, m, conexo, pesoMin, pesoMax);
+        for (std::list<Eje>::iterator it = listaIncidencias.begin(); it != listaIncidencias.end(); ++it) {
+            Eje &eje = *it;
+            listaAdyacencias[eje.origen].push_back(eje.destino);
+            listaAdyacencias[eje.destino].push_back(eje.origen);
+        }
+        return listaAdyacencias;
     }
 
 private:

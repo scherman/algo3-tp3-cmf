@@ -4,18 +4,22 @@
 
 #include "cmf-heuristica-constructiva-golosa.h"
 #include "busqueda-local.h"
+#include "meta-heuristica.h"
 #include "cmf-algo-exacto.h"
 #include <chrono>
 #include <random>
 #include <sstream>
 
 int main(int argc, char** argv) {
-    int n = 30, m = 300;
-    std::list<Eje> grafo = Utils::generarGrafo(n, m, false, 0, 0);
+    int n = 200, m = 500;
+    std::vector<std::list<int>> grafo = Utils::generarListaAdyacencias(n, m, false, 0, 0);
 //    std::cout << "Exacto: " << *cmfExacto(n, m, grafo) << std::endl;
-    Clique clique = heuristicaConstructiva(n, grafo);
-    std::cout << "Constructiva: " <<  clique << std::endl;
-    std::cout << "Busqueda local: " << busquedaLocal2(n, clique, grafo) << std::endl;
+    Clique *clique = hconstructiva(n, grafo, -1);
+    std::cout << "Constructiva: " <<  *clique << std::endl;
+    std::cout << "Busqueda local: " << *busquedaLocal(n, clique, grafo) << std::endl;
+    std::cout << "Grasp: " << *grasp(grafo, 30);
+    std::cout << std::endl;
+//    heuristicaConstructivaK(n, grafo, 5);
     return 0;
 }
 
@@ -35,7 +39,8 @@ void variarM(int cantInstanciasPorM, int constanteN){
     for (int i = minM; i <= maxM; ++i) {
         long long tiempoTotal = 0;
         for (int j = 0; j < cantInstanciasPorM; ++j) {
-            std::list<Eje> grafo = Utils::generarGrafo(constanteN, i, false, constantePesoMinimo, constantePesoMaximo);
+            std::list<Eje> grafo = Utils::generarListaIncidencias(constanteN, i, false, constantePesoMinimo,
+                                                                  constantePesoMaximo);
 
             auto tpi = std::chrono::high_resolution_clock::now();
 //            int res = problema_dos(grafo.first, constanteN, grafo.first.size(), grafo.second);

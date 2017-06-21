@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES_1 cmf-algo-exacto.cpp exacto.cpp cmf-algo-exacto.h)
 set(SOURCE_FILES_2 cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constructiva-golosa.h hconstructiva.cpp)
-set(SOURCE_FILES_3 cmf-algo-exacto.cpp cmf-algo-exacto.h cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constructiva-golosa.h busqueda-local.cpp busqueda-local.h experimentos.cpp)
+set(SOURCE_FILES_3 cmf-algo-exacto.cpp cmf-algo-exacto.h cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constructiva-golosa.h busqueda-local.cpp busqueda-local.h meta-heuristica.cpp meta-heuristica.h experimentos.cpp)
 set(SOURCE_FILES_4 cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constructiva-golosa.h busqueda-local.h busqueda-local.cpp blocal.cpp)
 set(SOURCE_FILES_5 cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constructiva-golosa.h busqueda-local.h busqueda-local.cpp meta-heuristica.h meta-heuristica.cpp mheuristica.cpp)
 add_executable(exacto ${SOURCE_FILES_1})
