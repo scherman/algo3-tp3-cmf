@@ -4,14 +4,14 @@
 
 #include "cmf-heuristica-constructiva-golosa.h"
 
-bool mejoraFrontera(Clique *clique, int vecino, std::vector<std::list<int>> listaAdyacencias) {
+bool mejoraFrontera(Clique &clique, int vecino, std::vector<std::list<int>> listaAdyacencias) {
     int gradoVecino = listaAdyacencias[vecino].size();
-    return (clique->frontera - 2 * clique->vertices.size() + gradoVecino) > clique->frontera;
+    return (clique.frontera - 2 * clique.vertices.size() + gradoVecino) > clique.frontera;
 }
 
-bool extiendeClique(Clique *clique, int vecino, std::vector<std::list<int>> listaAdyacencias) {
+bool extiendeClique(Clique &clique, int vecino, std::vector<std::list<int>> listaAdyacencias) {
     std::list<int> &adyacentesVecino = listaAdyacencias[vecino];
-    std::list<int> &verticesClique = clique->vertices;
+    std::list<int> &verticesClique = clique.vertices;
 
     for (std::list<int>::const_iterator itVClique = verticesClique.begin();
          itVClique != verticesClique.end(); ++itVClique) {
@@ -28,15 +28,15 @@ bool extiendeClique(Clique *clique, int vecino, std::vector<std::list<int>> list
     return true;
 }
 
-void extenderClique(Clique *clique, int vecino, bool **matrizAdyacencias, std::vector<std::list<int>> listaAdyacencias) {
-    for (std::list<int>::const_iterator itVClique = clique->vertices.begin();
-         itVClique != clique->vertices.end(); ++itVClique) {
+void extenderClique(Clique &clique, int vecino, std::vector<std::vector<bool>> &matrizAdyacencias, std::vector<std::list<int>> listaAdyacencias) {
+    for (std::list<int>::const_iterator itVClique = clique.vertices.begin();
+         itVClique != clique.vertices.end(); ++itVClique) {
         int verticeClique = *itVClique;
         matrizAdyacencias[verticeClique][vecino] = true;
         matrizAdyacencias[vecino][verticeClique] = true;
     }
-    clique->frontera = clique->frontera - 2 * clique->vertices.size() + listaAdyacencias[vecino].size();
-    clique->vertices.push_back(vecino);
+    clique.frontera = clique.frontera - 2 * clique.vertices.size() + listaAdyacencias[vecino].size();
+    clique.vertices.push_back(vecino);
 }
 
 /*
@@ -64,9 +64,8 @@ Clique* hconstructiva(int n, std::vector<std::list<int>> listaAdyacencias, int n
     V.push_back(actual);
     cliques[actual] = new Clique(V, listaAdyacencias[actual].size());
 
-    bool **matrizAdyacencias = new bool *[n];
+    std::vector<std::vector<bool>> matrizAdyacencias(n, std::vector<bool>(n));
     for (int i = 0; i < n; ++i) {
-        matrizAdyacencias[i] = new bool[n];
         for (int r = 0; r < n; ++r) {
             matrizAdyacencias[i][r] = (i == r);
         }
@@ -92,10 +91,10 @@ Clique* hconstructiva(int n, std::vector<std::list<int>> listaAdyacencias, int n
 
             Clique *cliqueActual = cliques[actual];
 
-            if (mejoraFrontera(cliqueActual, vecinoDisponible, listaAdyacencias)
-                && extiendeClique(cliqueActual, vecinoDisponible, listaAdyacencias)) {
+            if (mejoraFrontera(*cliqueActual, vecinoDisponible, listaAdyacencias)
+                && extiendeClique(*cliqueActual, vecinoDisponible, listaAdyacencias)) {
                 // vecinoActual esta en la clique de actual y aumenta la frontera. Lo agrego a la clique
-                extenderClique(cliqueActual, vecinoDisponible, matrizAdyacencias, listaAdyacencias);
+                extenderClique(*cliqueActual, vecinoDisponible, matrizAdyacencias, listaAdyacencias);
                 cliques[vecinoDisponible] = cliqueActual;
             } else {
                 // Le asigno una clique nueva a vecinoActual
@@ -137,11 +136,6 @@ Clique* hconstructiva(int n, std::vector<std::list<int>> listaAdyacencias, int n
             }
         }
     }
-
-    for (int i = 0; i < n; ++i) {
-        delete matrizAdyacencias[i];
-    }
-    delete[] matrizAdyacencias;
 
     return maxClique;
 }

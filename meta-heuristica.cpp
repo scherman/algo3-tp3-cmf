@@ -23,8 +23,13 @@ Clique* grasp(std::vector<std::list<int>> listaAdyacencias, int k) {
         usados[actual] = true;
 
         Clique *clique = hconstructiva(n, listaAdyacencias, actual);
-        clique = busquedaLocal(n, clique, listaAdyacencias);
-        if (maxClique == nullptr || maxClique->frontera < clique->frontera) maxClique = clique;
+        clique = &busquedaLocal(n, *clique, listaAdyacencias);
+        if (maxClique == nullptr || maxClique->frontera < clique->frontera) {
+            delete maxClique;
+            maxClique = clique;
+        } else {
+            delete clique;
+        }
     }
     return maxClique;
 }

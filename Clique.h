@@ -12,7 +12,13 @@ struct Clique{
     std::list<int> vertices;
 
 //    Clique() : frontera(0) {};
-    Clique(std::list<int> vertices, int frontera) : frontera(frontera), vertices(vertices){};
+    Clique(std::list<int> vertices, int frontera) : frontera(frontera), vertices(vertices){
+//        std::cout << "Creado " << this << std::endl;
+    };
+
+    ~Clique() {
+//        std::cout << "Destruido " << this << std::endl;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Clique& s){
         os << "[Clique(" << &s << ")] frontera: " << s.frontera << ", nodos: { ";

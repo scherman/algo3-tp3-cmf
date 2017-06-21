@@ -19,8 +19,8 @@ public:
         }
     }
 
-    static void imprimirListaAdyacencias(int n, std::vector<std::list<int>> listaAdyacencias) {
-        for (int i = 0; i < n; ++i) {
+    static void imprimirListaAdyacencias(std::vector<std::list<int>> listaAdyacencias) {
+        for (int i = 0; i < listaAdyacencias.size(); ++i) {
             std::cout << "N[" << i << "] = { ";
             for (std::list<int>::iterator it = listaAdyacencias[i].begin(); it != listaAdyacencias[i].end(); ++it) {
                 std::cout << *it << " ";
@@ -45,17 +45,13 @@ public:
 
         std::list<Eje> rutasExistentes;
 
-        int **ejesAgregados= new int*[n];
-        for(int i = 0; i < n; ++i) {
-            ejesAgregados[i] = new int[n];
-            for(int r = 0; r < n; ++r) {
-                if (i == r) {
-                    ejesAgregados[i][r] = 1;
-                } else {
-                    ejesAgregados[i][r] = 0;
-                }
+        std::vector<std::vector<int>> ejesAgregados(n, std::vector<int>(n));
+        for (int i = 0; i < n; ++i) {
+            for (int r = 0; r < n; ++r) {
+                ejesAgregados[i][r] = (i == r);
             }
         }
+
 
         std::random_device r;
         std::default_random_engine e1(r());
@@ -90,12 +86,6 @@ public:
                 }
             }
         }
-
-        for (int j = 0; j < n; ++j) {
-            delete ejesAgregados[j];
-        }
-        delete[] ejesAgregados;
-
         return rutasExistentes;
     }
 
