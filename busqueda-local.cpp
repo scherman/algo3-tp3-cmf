@@ -4,7 +4,9 @@
 
 #include "busqueda-local.h"
 
-Clique& busquedaLocal(int n, Clique &clique, std::vector<std::list<int>> grafoOriginal) {
+Clique& busquedaLocalExtendiendoClique(Clique &clique, std::vector<std::list<int>> &listaIncidencias) {
+    int n = listaIncidencias.size();
+
     bool nodosEnClique[n] = {false};
     for (std::list<int>::iterator it = clique.vertices.begin(); it != clique.vertices.end(); ++it) {
         nodosEnClique[*it] = true;
@@ -14,9 +16,9 @@ Clique& busquedaLocal(int n, Clique &clique, std::vector<std::list<int>> grafoOr
     while (mejoraSolucion) {
         mejoraSolucion = false;
         for (int i = 0; i < n; ++i) {
-            if (!nodosEnClique[i] && mejoraFrontera(clique, i, grafoOriginal) && extiendeClique(clique, i, grafoOriginal)) {
+            if (!nodosEnClique[i] && mejoraFrontera(clique, i, listaIncidencias) && extiendeClique(clique, i, listaIncidencias)) {
                 // Extiendo clique
-                clique.frontera = clique.frontera - 2*clique.vertices.size() + grafoOriginal[i].size();
+                clique.frontera = clique.frontera - 2*clique.vertices.size() + listaIncidencias[i].size();
                 clique.vertices.push_back(i);
                 nodosEnClique[i] = true;
                 mejoraSolucion = true;

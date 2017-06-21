@@ -13,6 +13,6 @@
 #include <fstream>
 #include "stringTokenizer.hpp"
 
-Clique* grasp(std::vector<std::list<int>> listaAdyacencias, int k);
+Clique* grasp(std::vector<std::list<int>> &listaAdyacencias, int k);
 
 #endif //TEST_DEBUGGER_META_HEURISTICA_H

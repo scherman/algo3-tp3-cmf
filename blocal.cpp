@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         }
         Clique cliqueMax = hconstructiva(n, listaAdyacencias);
         std::cout << "Clique hconstructiva: " << cliqueMax << std::endl;
-        cliqueMax = busquedaLocal(n, cliqueMax, listaAdyacencias);
+        cliqueMax = busquedaLocalExtendiendoClique(n, cliqueMax, listaAdyacencias);
         std::cout << "Clique blocal: " << cliqueMax << std::endl;
 
         // Output

@@ -6,7 +6,7 @@
 #include "cmf-heuristica-constructiva-golosa.h"
 #include "busqueda-local.h"
 
-Clique* grasp(std::vector<std::list<int>> listaAdyacencias, int k) {
+Clique* grasp(std::vector<std::list<int>> &listaAdyacencias, int k) {
     if (k > listaAdyacencias.size()) throw std::invalid_argument("No puede haber mas de n candidatos!");
 
     int n = listaAdyacencias.size();
@@ -22,8 +22,8 @@ Clique* grasp(std::vector<std::list<int>> listaAdyacencias, int k) {
         }
         usados[actual] = true;
 
-        Clique *clique = hconstructiva(n, listaAdyacencias, actual);
-        clique = &busquedaLocal(n, *clique, listaAdyacencias);
+        Clique *clique = hconstructiva(listaAdyacencias, actual);
+        clique = &busquedaLocalExtendiendoClique(*clique, listaAdyacencias);
         if (maxClique == nullptr || maxClique->frontera < clique->frontera) {
             delete maxClique;
             maxClique = clique;

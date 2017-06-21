@@ -11,14 +11,14 @@
 #include <sstream>
 
 int main(int argc, char** argv) {
-    int n = 500, m = 100;
+    int n = 500, m = 10000;
 //    for (int i = 0; i < 10000; ++i) {
         std::vector<std::list<int>> grafo = Utils::generarListaAdyacencias(n, m, false, 0, 0);
 //        std::cout << "Exacto: " << *cmfExacto(n, m, grafo) << std::endl;
 
-        Clique *clique = hconstructiva(n, grafo, -1);
+        Clique *clique = hconstructiva(grafo, -1);
         std::cout << "Constructiva: " <<  *clique << std::endl;
-        std::cout << "Busqueda local: " << busquedaLocal(n, *clique, grafo) << std::endl;
+        std::cout << "Busqueda local: " << busquedaLocalExtendiendoClique(*clique, grafo) << std::endl;
 
         Clique *graspClique = grasp(grafo, 5);
         std::cout << "Grasp: " << *graspClique << std::endl;

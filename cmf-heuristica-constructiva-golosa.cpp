@@ -4,12 +4,12 @@
 
 #include "cmf-heuristica-constructiva-golosa.h"
 
-bool mejoraFrontera(Clique &clique, int vecino, std::vector<std::list<int>> listaAdyacencias) {
+bool mejoraFrontera(Clique &clique, int vecino, std::vector<std::list<int>> &listaAdyacencias) {
     int gradoVecino = listaAdyacencias[vecino].size();
     return (clique.frontera - 2 * clique.vertices.size() + gradoVecino) > clique.frontera;
 }
 
-bool extiendeClique(Clique &clique, int vecino, std::vector<std::list<int>> listaAdyacencias) {
+bool extiendeClique(Clique &clique, int vecino, std::vector<std::list<int>> &listaAdyacencias) {
     std::list<int> &adyacentesVecino = listaAdyacencias[vecino];
     std::list<int> &verticesClique = clique.vertices;
 
@@ -28,7 +28,7 @@ bool extiendeClique(Clique &clique, int vecino, std::vector<std::list<int>> list
     return true;
 }
 
-void extenderClique(Clique &clique, int vecino, std::vector<std::vector<bool>> &matrizAdyacencias, std::vector<std::list<int>> listaAdyacencias) {
+void extenderClique(Clique &clique, int vecino, std::vector<std::vector<bool>> &matrizAdyacencias, std::vector<std::list<int>> & listaAdyacencias) {
     for (std::list<int>::const_iterator itVClique = clique.vertices.begin();
          itVClique != clique.vertices.end(); ++itVClique) {
         int verticeClique = *itVClique;
@@ -47,7 +47,8 @@ void extenderClique(Clique &clique, int vecino, std::vector<std::vector<bool>> &
  * 3. Repetir 2 hasta que no haya adyacentes
  * 4. Devolver la clique con mayor frontera de la lista de cliques
  */
-Clique* hconstructiva(int n, std::vector<std::list<int>> listaAdyacencias, int nodoInicial) {
+Clique* hconstructiva(std::vector<std::list<int>> &listaAdyacencias, int nodoInicial) {
+    int n = listaAdyacencias.size();
 
     // Busco nodo de mayor grado
     int actual = 0;

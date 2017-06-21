@@ -19,7 +19,7 @@ public:
         }
     }
 
-    static void imprimirListaAdyacencias(std::vector<std::list<int>> listaAdyacencias) {
+    static void imprimirListaAdyacencias(std::vector<std::list<int>> &listaAdyacencias) {
         for (int i = 0; i < listaAdyacencias.size(); ++i) {
             std::cout << "N[" << i << "] = { ";
             for (std::list<int>::iterator it = listaAdyacencias[i].begin(); it != listaAdyacencias[i].end(); ++it) {
@@ -29,7 +29,7 @@ public:
         }
     }
 
-    static void imprimirMatrizAdyacencias(int n, bool **matrizAdyacencias) {
+    static void imprimirMatrizAdyacencias(int n, std::vector<std::vector<int>> &matrizAdyacencias) {
         for (int k = 0; k < n; ++k) {
             for (int i = 0; i < n; ++i) {
                 std::cout << matrizAdyacencias[k][i] << " ";
