@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
             listaIncidencias.push_back({v1,v2});
         }
         DisjointSet uds = DisjointSet(n);
-        Clique *cliqueMax = cmfExacto(uds, listaIncidencias, listaAdyacencias);
+        Clique *cliqueMax = exactoBT(uds, listaIncidencias, listaAdyacencias);
 
         // Output
         std::cout << cliqueMax->frontera << " " << cliqueMax->vertices.size();

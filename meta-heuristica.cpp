@@ -6,6 +6,7 @@
 #include "cmf-heuristica-constructiva-golosa.h"
 #include "busqueda-local.h"
 
+// O(k(n+hconstructiva+busquedaLocal))
 Clique* grasp(std::vector<std::list<int>> &listaAdyacencias, int k) {
     if (k > listaAdyacencias.size()) throw std::invalid_argument("No puede haber mas de n candidatos!");
 

@@ -4,20 +4,22 @@
 
 #include "cmf-heuristica-constructiva-golosa.h"
 
+// O(1)
 bool mejoraFrontera(Clique &clique, int vecino, std::vector<std::list<int>> &listaAdyacencias) {
     int gradoVecino = listaAdyacencias[vecino].size();
     return (clique.frontera - 2 * clique.vertices.size() + gradoVecino) > clique.frontera;
 }
 
+// O(n^2)
 bool extiendeClique(Clique &clique, int vecino, std::vector<std::list<int>> &listaAdyacencias) {
     std::list<int> &adyacentesVecino = listaAdyacencias[vecino];
     std::list<int> &verticesClique = clique.vertices;
 
     for (std::list<int>::const_iterator itVClique = verticesClique.begin();
-         itVClique != verticesClique.end(); ++itVClique) {
+         itVClique != verticesClique.end(); ++itVClique) { // O(n)
         int verticeClique = *itVClique;
         bool verticeCliqueIncideEnVecino = false;
-        for (std::list<int>::const_iterator itAdyacentes = adyacentesVecino.begin();
+        for (std::list<int>::const_iterator itAdyacentes = adyacentesVecino.begin(); // O(n)
              itAdyacentes != adyacentesVecino.end(); ++itAdyacentes) {
             int adyacenteVecino = *itAdyacentes;
 
@@ -28,6 +30,7 @@ bool extiendeClique(Clique &clique, int vecino, std::vector<std::list<int>> &lis
     return true;
 }
 
+// O(n)
 void extenderClique(Clique &clique, int vecino, std::vector<std::vector<bool>> &matrizAdyacencias, std::vector<std::list<int>> & listaAdyacencias) {
     for (std::list<int>::const_iterator itVClique = clique.vertices.begin();
          itVClique != clique.vertices.end(); ++itVClique) {
@@ -47,6 +50,7 @@ void extenderClique(Clique &clique, int vecino, std::vector<std::vector<bool>> &
  * 3. Repetir 2 hasta que no haya adyacentes
  * 4. Devolver la clique con mayor frontera de la lista de cliques
  */
+// O(n + n^2(n^2)) = O(n^4)
 Clique* hconstructiva(std::vector<std::list<int>> &listaAdyacencias, int nodoInicial) {
     int n = listaAdyacencias.size();
 
@@ -72,12 +76,12 @@ Clique* hconstructiva(std::vector<std::list<int>> &listaAdyacencias, int nodoIni
         }
     }
 
-    while (actual != -1) {
+    while (actual != -1) { // O(n^2) (si es completo)
         std::list<int> &adyacentes = listaAdyacencias[actual];
 
         // Obtener vecinoDisponible de mayor grado
         int vecinoDisponible = -1;
-        for (std::list<int>::const_iterator it = adyacentes.begin(); it != adyacentes.end(); ++it) {
+        for (std::list<int>::const_iterator it = adyacentes.begin(); it != adyacentes.end(); ++it) { // O(n)
             if (matrizAdyacencias[*it][actual]) continue;
             if (cliques[*it] != nullptr) continue;
             if (vecinoDisponible == -1 || listaAdyacencias[vecinoDisponible].size() < listaAdyacencias[*it].size()) {
@@ -92,10 +96,10 @@ Clique* hconstructiva(std::vector<std::list<int>> &listaAdyacencias, int nodoIni
 
             Clique *cliqueActual = cliques[actual];
 
-            if (mejoraFrontera(*cliqueActual, vecinoDisponible, listaAdyacencias)
-                && extiendeClique(*cliqueActual, vecinoDisponible, listaAdyacencias)) {
+            if (mejoraFrontera(*cliqueActual, vecinoDisponible, listaAdyacencias) // O(1)
+                && extiendeClique(*cliqueActual, vecinoDisponible, listaAdyacencias)) {  // O(n^2)
                 // vecinoActual esta en la clique de actual y aumenta la frontera. Lo agrego a la clique
-                extenderClique(*cliqueActual, vecinoDisponible, matrizAdyacencias, listaAdyacencias);
+                extenderClique(*cliqueActual, vecinoDisponible, matrizAdyacencias, listaAdyacencias); // O(n)
                 cliques[vecinoDisponible] = cliqueActual;
             } else {
                 // Le asigno una clique nueva a vecinoActual

@@ -13,6 +13,36 @@
 class Utils {
 
 public:
+    static std::vector<std::list<int>> aListaAdyacencias(int n, std::list<Eje> &listaIncidencias) {
+        std::vector<std::list<int>> listaAdyacencias(n);
+        for (std::list<Eje>::iterator it = listaIncidencias.begin(); it != listaIncidencias.end(); ++it) {
+            Eje &eje = *it;
+            listaAdyacencias[eje.origen].push_back(eje.destino);
+            listaAdyacencias[eje.destino].push_back(eje.origen);
+        }
+        return listaAdyacencias;
+    }
+
+    static std::list<Eje> aListaIncidencias(std::vector<std::list<int>> &listaAdyacencias) {
+        int n = listaAdyacencias.size();
+
+        std::vector<std::vector<bool>> matrizAdyacencias(n, std::vector<bool>(n));
+        for (int i = 0; i < n; ++i) {
+            for (int r = 0; r < n; ++r) {
+                matrizAdyacencias[i][r] = (i == r);
+            }
+        }
+
+        std::list<Eje> listaIncidencias;
+        for (int j = 0; j < n; ++j) {
+            for (std::list<int>::iterator it = listaAdyacencias[j].begin(); it != listaAdyacencias[j].end(); ++it) {
+                if (!matrizAdyacencias[j][*it]) listaIncidencias.push_back({j, *it, 0});
+            }
+        }
+
+        return listaIncidencias;
+    }
+
     static void imprimirListaIncidencias(std::list<Eje> &ejes) {
         for (std::list<Eje>::iterator it = ejes.begin(); it != ejes.end(); ++it) {
             std::cout << *it << " ";

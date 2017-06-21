@@ -13,8 +13,9 @@
 #include <fstream>
 #include "stringTokenizer.hpp"
 
-Clique * cmfExacto(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::list<int> *listaAdyacencias);
+Clique * exactoBT(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::vector<std::list<int>> &listaAdyacencias);
 
-Clique * cmfExacto(int n, int m, std::list<Eje> &listaIncidencias);
+Clique * exactoBT(int n, std::list<Eje> &listaIncidencias);
+Clique * exactoBT(std::vector<std::list<int>> &listaAdyacencias);
 
 #endif //TEST_DEBUGGER_CMF_ALGO_EXACTO_H_H

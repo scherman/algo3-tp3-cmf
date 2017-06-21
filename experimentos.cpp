@@ -11,10 +11,12 @@
 #include <sstream>
 
 int main(int argc, char** argv) {
-    int n = 500, m = 10000;
+    int n = 5, m = 4;
 //    for (int i = 0; i < 10000; ++i) {
         std::vector<std::list<int>> grafo = Utils::generarListaAdyacencias(n, m, false, 0, 0);
-//        std::cout << "Exacto: " << *cmfExacto(n, m, grafo) << std::endl;
+
+        Clique *cliqueExacto = exactoBT(grafo);
+        std::cout << "Exacto: " << *cliqueExacto << std::endl;
 
         Clique *clique = hconstructiva(grafo, -1);
         std::cout << "Constructiva: " <<  *clique << std::endl;
@@ -24,6 +26,7 @@ int main(int argc, char** argv) {
         std::cout << "Grasp: " << *graspClique << std::endl;
         delete clique;
         delete graspClique;
+        delete cliqueExacto;
 //    }
     return 0;
 }
