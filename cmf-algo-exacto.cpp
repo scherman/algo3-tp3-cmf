@@ -49,10 +49,10 @@ Clique * exactoBT(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::vector<
     }
 }
 
-Clique * exactoBT(int n, std::list<Eje> &ejesNoAgregados) {
+Clique * exactoBT(int n, std::list<Eje> &listaIncidencias) {
     DisjointSet uds(n);
-    std::vector<std::list<int>> listaAdyacencias = Utils::aListaAdyacencias(n, ejesNoAgregados);
-    return exactoBT(uds, ejesNoAgregados, listaAdyacencias);
+    std::vector<std::list<int>> listaAdyacencias = Utils::aListaAdyacencias(n, listaIncidencias);
+    return exactoBT(uds, listaIncidencias, listaAdyacencias);
 }
 
 Clique * exactoBT(std::vector<std::list<int>> &listaAdyacencias) {

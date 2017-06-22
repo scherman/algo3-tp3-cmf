@@ -13,6 +13,41 @@
 class Utils {
 
 public:
+    static std::vector<std::vector<bool>> aMatrizAdyacencias(std::vector<std::list<int>> &listaAdyacencias) {
+        int n = listaAdyacencias.size();
+        std::vector<std::vector<bool>> matrizAdyacencias(n, std::vector<bool>(n));
+
+        for (int j = 0; j < n; ++j) {
+            for (int i = 0; i < n; ++i) {
+                matrizAdyacencias[j][i] = false;
+            }
+        }
+
+        for (int i = 0; i < n; ++i) {
+            for (std::list<int>::iterator it = listaAdyacencias[i].begin(); it != listaAdyacencias[i].end(); ++it) {
+                matrizAdyacencias[i][*it] = true;
+                matrizAdyacencias[*it][i] = true;
+            }
+        }
+        return matrizAdyacencias;
+    }
+
+    static std::vector<std::vector<bool>> aMatrizAdyacencias(int n, std::list<Eje> &listaIncidencias) {
+        std::vector<std::vector<bool>> matrizAdyacencias(n, std::vector<bool>(n));
+
+        for (int j = 0; j < n; ++j) {
+            for (int i = 0; i < n; ++i) {
+                matrizAdyacencias[j][i] = false;
+            }
+        }
+
+        for (std::list<Eje>::iterator it = listaIncidencias.begin(); it != listaIncidencias.end(); ++it) {
+            matrizAdyacencias[it->origen][it->destino] = true;
+            matrizAdyacencias[it->destino][it->origen] = true;
+        }
+        return matrizAdyacencias;
+    }
+
     static std::vector<std::list<int>> aListaAdyacencias(int n, std::list<Eje> &listaIncidencias) {
         std::vector<std::list<int>> listaAdyacencias(n);
         for (std::list<Eje>::iterator it = listaIncidencias.begin(); it != listaIncidencias.end(); ++it) {
@@ -26,17 +61,12 @@ public:
     static std::list<Eje> aListaIncidencias(std::vector<std::list<int>> &listaAdyacencias) {
         int n = listaAdyacencias.size();
 
-        std::vector<std::vector<bool>> matrizAdyacencias(n, std::vector<bool>(n));
-        for (int i = 0; i < n; ++i) {
-            for (int r = 0; r < n; ++r) {
-                matrizAdyacencias[i][r] = (i == r);
-            }
-        }
+        std::vector<std::vector<bool>> matrizAdyacencias = aMatrizAdyacencias(listaAdyacencias);
 
         std::list<Eje> listaIncidencias;
         for (int j = 0; j < n; ++j) {
             for (std::list<int>::iterator it = listaAdyacencias[j].begin(); it != listaAdyacencias[j].end(); ++it) {
-                if (!matrizAdyacencias[j][*it]) listaIncidencias.push_back({j, *it, 0});
+                if (matrizAdyacencias[j][*it]) listaIncidencias.push_back({j, *it, 0});
             }
         }
 
@@ -81,7 +111,6 @@ public:
                 ejesAgregados[i][r] = (i == r);
             }
         }
-
 
         std::random_device r;
         std::default_random_engine e1(r());

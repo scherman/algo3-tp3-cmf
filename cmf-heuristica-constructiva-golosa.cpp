@@ -10,22 +10,14 @@ bool mejoraFrontera(Clique &clique, int vecino, std::vector<std::list<int>> &lis
     return (clique.frontera - 2 * clique.vertices.size() + gradoVecino) > clique.frontera;
 }
 
-// O(n^2)
-bool extiendeClique(Clique &clique, int vecino, std::vector<std::list<int>> &listaAdyacencias) {
+// O(n)
+bool extiendeClique(Clique &clique, int vecino, std::vector<std::vector<bool>> &matrizAdyacencias, std::vector<std::list<int>> &listaAdyacencias) {
     std::list<int> &adyacentesVecino = listaAdyacencias[vecino];
     std::list<int> &verticesClique = clique.vertices;
 
     for (std::list<int>::const_iterator itVClique = verticesClique.begin();
          itVClique != verticesClique.end(); ++itVClique) { // O(n)
-        int verticeClique = *itVClique;
-        bool verticeCliqueIncideEnVecino = false;
-        for (std::list<int>::const_iterator itAdyacentes = adyacentesVecino.begin(); // O(n)
-             itAdyacentes != adyacentesVecino.end(); ++itAdyacentes) {
-            int adyacenteVecino = *itAdyacentes;
-
-            if (verticeClique == adyacenteVecino) verticeCliqueIncideEnVecino = true;
-        }
-        if (!verticeCliqueIncideEnVecino) return false;
+        if (!matrizAdyacencias[vecino][*itVClique]) return false;
     }
     return true;
 }
@@ -50,7 +42,7 @@ void extenderClique(Clique &clique, int vecino, std::vector<std::vector<bool>> &
  * 3. Repetir 2 hasta que no haya adyacentes
  * 4. Devolver la clique con mayor frontera de la lista de cliques
  */
-// O(n + n^2(n^2)) = O(n^4)
+// O(nm)
 Clique* hconstructiva(std::vector<std::list<int>> &listaAdyacencias, int nodoInicial) {
     int n = listaAdyacencias.size();
 
@@ -97,7 +89,7 @@ Clique* hconstructiva(std::vector<std::list<int>> &listaAdyacencias, int nodoIni
             Clique *cliqueActual = cliques[actual];
 
             if (mejoraFrontera(*cliqueActual, vecinoDisponible, listaAdyacencias) // O(1)
-                && extiendeClique(*cliqueActual, vecinoDisponible, listaAdyacencias)) {  // O(n^2)
+                && extiendeClique(*cliqueActual, vecinoDisponible, matrizAdyacencias, listaAdyacencias)) {  // O(n^2)
                 // vecinoActual esta en la clique de actual y aumenta la frontera. Lo agrego a la clique
                 extenderClique(*cliqueActual, vecinoDisponible, matrizAdyacencias, listaAdyacencias); // O(n)
                 cliques[vecinoDisponible] = cliqueActual;

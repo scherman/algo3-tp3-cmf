@@ -7,7 +7,9 @@
 #include "busqueda-local.h"
 
 // O(k(n+hconstructiva+busquedaLocal))
-Clique* grasp(std::vector<std::list<int>> &listaAdyacencias, int k) {
+Clique* grasp(std::vector<std::vector<bool>> &matrizAdyacencias,
+              std::vector<std::list<int>> &listaAdyacencias,
+              int k) {
     if (k > listaAdyacencias.size()) throw std::invalid_argument("No puede haber mas de n candidatos!");
 
     int n = listaAdyacencias.size();
@@ -24,7 +26,7 @@ Clique* grasp(std::vector<std::list<int>> &listaAdyacencias, int k) {
         usados[actual] = true;
 
         Clique *clique = hconstructiva(listaAdyacencias, actual);
-        clique = &busquedaLocalExtendiendoClique(*clique, listaAdyacencias);
+        clique = &busquedaLocalExtendiendoClique(*clique, matrizAdyacencias, listaAdyacencias);
         if (maxClique == nullptr || maxClique->frontera < clique->frontera) {
             delete maxClique;
             maxClique = clique;

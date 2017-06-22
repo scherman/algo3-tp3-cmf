@@ -7,6 +7,8 @@
 
 #include "cmf-heuristica-constructiva-golosa.h"
 
-Clique& busquedaLocalExtendiendoClique(Clique &clique, std::vector<std::list<int>> &listaIncidencias);
+Clique& busquedaLocalExtendiendoClique(Clique &clique,
+                                       std::vector<std::vector<bool>> &matrizAdyacencias,
+                                       std::vector<std::list<int>> &listaIncidencias);
 
 #endif //TEST_DEBUGGER_BUSQUEDA_LOCAL_H_H

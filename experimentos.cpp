@@ -12,22 +12,21 @@
 
 int main(int argc, char** argv) {
     int n = 5, m = 4;
-//    for (int i = 0; i < 10000; ++i) {
-        std::vector<std::list<int>> grafo = Utils::generarListaAdyacencias(n, m, false, 0, 0);
+    std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
+    std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
 
-        Clique *cliqueExacto = exactoBT(grafo);
-        std::cout << "Exacto: " << *cliqueExacto << std::endl;
+    Clique *cliqueExacto = exactoBT(listaAdyacencias);
+    std::cout << "Exacto: " << *cliqueExacto << std::endl;
 
-        Clique *clique = hconstructiva(grafo, -1);
-        std::cout << "Constructiva: " <<  *clique << std::endl;
-        std::cout << "Busqueda local: " << busquedaLocalExtendiendoClique(*clique, grafo) << std::endl;
+    Clique *clique = hconstructiva(listaAdyacencias, -1);
+    std::cout << "Constructiva: " <<  *clique << std::endl;
+    std::cout << "Busqueda local: " << busquedaLocalExtendiendoClique(*clique, matrizAdyacencias, listaAdyacencias) << std::endl;
 
-        Clique *graspClique = grasp(grafo, 5);
-        std::cout << "Grasp: " << *graspClique << std::endl;
-        delete clique;
-        delete graspClique;
-        delete cliqueExacto;
-//    }
+    Clique *graspClique = grasp(matrizAdyacencias, listaAdyacencias, 5);
+    std::cout << "Grasp: " << *graspClique << std::endl;
+    delete clique;
+    delete graspClique;
+    delete cliqueExacto;
     return 0;
 }
 
