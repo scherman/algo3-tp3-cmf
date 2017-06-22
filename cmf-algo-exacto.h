@@ -22,4 +22,7 @@ Clique exactoBTVertices(int n,
                         std::vector<std::vector<bool>> &matrizAdyacencias,
                         std::vector<std::list<int>> &listaAdyacencias);
 
+void escribirTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN);
+void escribirTiemposVariandoM(int cantInstanciasPorM, int constanteN);
+
 #endif //TEST_DEBUGGER_CMF_ALGO_EXACTO_H_H

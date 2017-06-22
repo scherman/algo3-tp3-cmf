@@ -89,7 +89,7 @@ public:
         }
     }
 
-    static void imprimirMatrizAdyacencias(int n, std::vector<std::vector<int>> &matrizAdyacencias) {
+    static void imprimirMatrizAdyacencias(int n, std::vector<std::vector<bool>> &matrizAdyacencias) {
         for (int k = 0; k < n; ++k) {
             for (int i = 0; i < n; ++i) {
                 std::cout << matrizAdyacencias[k][i] << " ";
