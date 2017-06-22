@@ -8,7 +8,6 @@
 #include <iostream>
 #include "Clique.h"
 #include "Eje.h"
-#include "DisjointSet.h"
 #include "Utils.h"
 #include <fstream>
 #include "stringTokenizer.hpp"

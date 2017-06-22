@@ -1,64 +1,56 @@
 
 #include "cmf-algo-exacto.h"
 
-Clique & filtrarPeorClique(Clique &cliqueA, Clique &cliqueB) {
+Clique& maxFrontera(Clique &cliqueA, Clique &cliqueB) {
     if (cliqueA.frontera >= cliqueB.frontera) {
-        delete &cliqueB;
         return cliqueA;
     } else {
-        delete &cliqueA;
         return cliqueB;
     }
 }
 
-int calcularFrontera(const std::list<int> &nodos, std::vector<std::list<int>> &listaAdyacencias){
-    int frontera = -(nodos.size() * (nodos.size() - 1));
-    for (std::list<int>::const_iterator it = nodos.begin(); it != nodos.end(); ++it) {
-        frontera += listaAdyacencias[*it].size();
+bool extiendeClique(
+        Clique clique,
+        std::vector<std::vector<bool>> &matrizAdyacencias,
+        std::vector<std::list<int>> &listaAdyacencias,
+        int verticeActual) {
+    for (std::list<int>::iterator it = clique.vertices.begin(); it != clique.vertices.end(); ++it) {
+        if (!matrizAdyacencias[*it][verticeActual]) return false;
     }
-    return frontera;
+    return true;
 }
 
-Clique * exactoBT(DisjointSet &uds, std::list<Eje> ejesNoAgregados, std::vector<std::list<int>> &listaAdyacencias){
-    if (ejesNoAgregados.size() == 0) {
-        // m=0 => Todos los vertices son aislados (o sea G=nK1). Como n>=1, tomamos a la clique K1 = 0 con la frontera 0 (porque no hay ejes)
-        std::list<int> V;
-        V.push_back(0);
-        return new Clique(V, 0);
+Clique exactoBTVertices(int n,
+                         Clique clique,
+                         std::vector<std::vector<bool>> &matrizAdyacencias,
+                         std::vector<std::list<int>> &listaAdyacencias,
+                         int verticeActual) {
+    if (verticeActual >= n) {
+        return clique;
     } else {
-        Clique *cmfMax = nullptr;
 
-        Eje e = ejesNoAgregados.front();
-        ejesNoAgregados.pop_front();
+        // Primer llamada recursiva (sin agregar vecinoActual a la clique)
+        Clique cliqueSinVerticeActual = exactoBTVertices(n, clique, matrizAdyacencias, listaAdyacencias, verticeActual + 1);
 
-        // Ver si la componente conexa que forma e es una clique.
-        DisjointSet udsConE = DisjointSet(uds);
-        DisjointSet::Subset unionSets = udsConE.unify(e);
-        if (unionSets.esClique()) {
-            cmfMax = new Clique(unionSets.nodos, calcularFrontera(unionSets.nodos, listaAdyacencias));
+        if (extiendeClique(clique, matrizAdyacencias, listaAdyacencias, verticeActual)) {
+            clique.frontera = clique.frontera - 2 * clique.vertices.size() + listaAdyacencias[verticeActual].size();
+            clique.vertices.push_back(verticeActual);
+
+            // Segunda llamada recursiva (agregando vecinoActual a la clique)
+            Clique cliqueConVerticeActual = exactoBTVertices(n, clique, matrizAdyacencias, listaAdyacencias, verticeActual + 1);
+
+            return maxFrontera(cliqueConVerticeActual, cliqueSinVerticeActual);
+        } else {
+            return cliqueSinVerticeActual;
         }
-
-        // Llamadas a las 2 ramas (con y sin e respectivamente)
-        Clique *cmfConE = exactoBT(udsConE, ejesNoAgregados, listaAdyacencias);
-        Clique *cmfSinE = exactoBT(uds, ejesNoAgregados, listaAdyacencias);
-
-        // Filtrar entre la mejor clique entre cmfConE, cmfSinE, cmfMax
-        cmfMax = cmfMax != nullptr ? &filtrarPeorClique(*cmfConE, *cmfMax) : cmfConE;
-        cmfMax = &filtrarPeorClique(*cmfMax, *cmfSinE);
-        return cmfMax;
     }
 }
 
-Clique * exactoBT(int n, std::list<Eje> &listaIncidencias) {
-    DisjointSet uds(n);
-    std::vector<std::list<int>> listaAdyacencias = Utils::aListaAdyacencias(n, listaIncidencias);
-    return exactoBT(uds, listaIncidencias, listaAdyacencias);
-}
-
-Clique * exactoBT(std::vector<std::list<int>> &listaAdyacencias) {
-    DisjointSet uds(listaAdyacencias.size());
-    std::list<Eje> listaIncidencias = Utils::aListaIncidencias(listaAdyacencias);
-    return exactoBT(uds, listaIncidencias, listaAdyacencias);
+Clique exactoBTVertices(int n,
+                        std::vector<std::vector<bool>> &matrizAdyacencias,
+                        std::vector<std::list<int>> &listaAdyacencias) {
+    std::list<int> V;
+    return exactoBTVertices(n, Clique(V, 0), matrizAdyacencias, listaAdyacencias, 0);
 }
 
 

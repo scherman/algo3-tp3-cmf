@@ -8,7 +8,6 @@
 #include <iostream>
 #include "Clique.h"
 #include "Eje.h"
-#include "DisjointSet.h"
 #include <list>
 #include "Utils.h"
 #include <fstream>
