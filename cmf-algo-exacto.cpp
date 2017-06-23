@@ -25,24 +25,24 @@ bool extiendeClique(
     return true;
 }
 
-Clique exactoBTVertices(int n,
-                         Clique clique,
+Clique exactoBTVertices(Clique clique,
                          std::vector<std::vector<bool>> &matrizAdyacencias,
                          std::vector<std::list<int>> &listaAdyacencias,
                          int verticeActual) {
+    int n = listaAdyacencias.size();
     if (verticeActual >= n) {
         return clique;
     } else {
 
         // Primer llamada recursiva (sin agregar vecinoActual a la clique)
-        Clique cliqueSinVerticeActual = exactoBTVertices(n, clique, matrizAdyacencias, listaAdyacencias, verticeActual + 1);
+        Clique cliqueSinVerticeActual = exactoBTVertices(clique, matrizAdyacencias, listaAdyacencias, verticeActual + 1);
 
         if (extiendeClique(clique, matrizAdyacencias, listaAdyacencias, verticeActual)) {
             clique.frontera = clique.frontera - 2 * clique.vertices.size() + listaAdyacencias[verticeActual].size();
             clique.vertices.push_back(verticeActual);
 
             // Segunda llamada recursiva (agregando vecinoActual a la clique)
-            Clique cliqueConVerticeActual = exactoBTVertices(n, clique, matrizAdyacencias, listaAdyacencias, verticeActual + 1);
+            Clique cliqueConVerticeActual = exactoBTVertices(clique, matrizAdyacencias, listaAdyacencias, verticeActual + 1);
             return maxFrontera(cliqueConVerticeActual, cliqueSinVerticeActual);
         } else {
             return cliqueSinVerticeActual;
@@ -54,9 +54,8 @@ Clique exactoBTVertices(int n,
                         std::vector<std::vector<bool>> &matrizAdyacencias,
                         std::vector<std::list<int>> &listaAdyacencias) {
     std::list<int> V;
-    return exactoBTVertices(n, Clique(V, 0), matrizAdyacencias, listaAdyacencias, 0);
+    return exactoBTVertices(Clique(V, 0), matrizAdyacencias, listaAdyacencias, 0);
 }
-
 
 void escribirTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN){
     std::string nombreArchivo = "tiempos-exacto-variando-n";
@@ -123,4 +122,35 @@ void escribirTiemposVariandoM(int cantInstanciasPorM, int constanteN){
     std::cout << "Listo!" << std::endl;
 }
 
+void escribirTiemposVariandoNSinEjes(int cantInstanciasPorN, int minN, int maxN){
+    std::string nombreArchivo = "tiempos-exacto-variando-n-m0";
 
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, tiempoTotal" << std::endl;
+
+    int m = 0;
+    std::cout << "Variando n: {m=" << m << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; ++i) {
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique clique = exactoBTVertices(i, matrizAdyacencias, listaAdyacencias);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " <<  tiempoTotal << std::endl ;
+        a_file << i <<  ", " << m << ", " << tiempoTotal << std::endl;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
