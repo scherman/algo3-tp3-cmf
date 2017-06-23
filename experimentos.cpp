@@ -11,14 +11,14 @@
 #include <sstream>
 
 int main(int argc, char** argv) {
-    int n = 15, m = (n*(n-1))/2;
+    int n = 20, m = (n*(n-1))/2;
     std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
     std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
 
-    Clique cliqueExacto = exactoBTVertices(n, matrizAdyacencias, listaAdyacencias);
+    Clique cliqueExacto = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
     std::cout << "Exacto: " << cliqueExacto << std::endl;
 
-    Clique *clique = hconstructiva(listaAdyacencias, -1);
+    Clique *clique = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
     std::cout << "Constructiva: " <<  *clique << std::endl;
     std::cout << "Busqueda local: " << busquedaLocalExtendiendoClique(*clique, matrizAdyacencias, listaAdyacencias) << std::endl;
 

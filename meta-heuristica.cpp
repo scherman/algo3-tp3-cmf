@@ -25,7 +25,7 @@ Clique* grasp(std::vector<std::vector<bool>> &matrizAdyacencias,
         }
         usados[actual] = true;
 
-        Clique *clique = hconstructiva(listaAdyacencias, actual);
+        Clique *clique = hconstructiva(matrizAdyacencias, listaAdyacencias, actual);
         clique = &busquedaLocalExtendiendoClique(*clique, matrizAdyacencias, listaAdyacencias);
         if (maxClique == nullptr || maxClique->frontera < clique->frontera) {
             delete maxClique;

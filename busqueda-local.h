@@ -11,4 +11,6 @@ Clique& busquedaLocalExtendiendoClique(Clique &clique,
                                        std::vector<std::vector<bool>> &matrizAdyacencias,
                                        std::vector<std::list<int>> &listaIncidencias);
 
+void porcentajeErrorVariandoMBusquedaLocal(int cantInstanciasPorM, int constanteN, int saltarDeA);
+
 #endif //TEST_DEBUGGER_BUSQUEDA_LOCAL_H_H

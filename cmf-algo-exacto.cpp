@@ -40,7 +40,6 @@ Clique exactoBTVertices(Clique clique,
         if (extiendeClique(clique, matrizAdyacencias, listaAdyacencias, verticeActual)) {
             clique.frontera = clique.frontera - 2 * clique.vertices.size() + listaAdyacencias[verticeActual].size();
             clique.vertices.push_back(verticeActual);
-
             // Segunda llamada recursiva (agregando vecinoActual a la clique)
             Clique cliqueConVerticeActual = exactoBTVertices(clique, matrizAdyacencias, listaAdyacencias, verticeActual + 1);
             return maxFrontera(cliqueConVerticeActual, cliqueSinVerticeActual);
@@ -50,8 +49,7 @@ Clique exactoBTVertices(Clique clique,
     }
 }
 
-Clique exactoBTVertices(int n,
-                        std::vector<std::vector<bool>> &matrizAdyacencias,
+Clique exactoBTVertices(std::vector<std::vector<bool>> &matrizAdyacencias,
                         std::vector<std::list<int>> &listaAdyacencias) {
     std::list<int> V;
     return exactoBTVertices(Clique(V, 0), matrizAdyacencias, listaAdyacencias, 0);
@@ -75,7 +73,7 @@ void escribirTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN){
             std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
             std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
             auto tpi = std::chrono::high_resolution_clock::now();
-            Clique clique = exactoBTVertices(i, matrizAdyacencias, listaAdyacencias);
+            Clique clique = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
             auto tpf = std::chrono::high_resolution_clock::now();
             auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
             tiempoTotal+= tiempo;
@@ -107,7 +105,7 @@ void escribirTiemposVariandoM(int cantInstanciasPorM, int constanteN){
             std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(constanteN, i, false, 0, 0);
             std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
             auto tpi = std::chrono::high_resolution_clock::now();
-            Clique clique = exactoBTVertices(constanteN, matrizAdyacencias, listaAdyacencias);
+            Clique clique = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
             auto tpf = std::chrono::high_resolution_clock::now();
             auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
             tiempoTotal+= tiempo;
@@ -140,7 +138,7 @@ void escribirTiemposVariandoNSinEjes(int cantInstanciasPorN, int minN, int maxN)
             std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
             std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
             auto tpi = std::chrono::high_resolution_clock::now();
-            Clique clique = exactoBTVertices(i, matrizAdyacencias, listaAdyacencias);
+            Clique clique = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
             auto tpf = std::chrono::high_resolution_clock::now();
             auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
             tiempoTotal+= tiempo;

@@ -17,8 +17,7 @@ Clique exactoBTVertices(Clique clique,
                         std::vector<std::list<int>> &listaAdyacencias,
                         int verticeActual);
 
-Clique exactoBTVertices(int n,
-                        std::vector<std::vector<bool>> &matrizAdyacencias,
+Clique exactoBTVertices(std::vector<std::vector<bool>> &matrizAdyacencias,
                         std::vector<std::list<int>> &listaAdyacencias);
 
 void escribirTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN);

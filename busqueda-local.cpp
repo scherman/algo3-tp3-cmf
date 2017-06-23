@@ -3,6 +3,8 @@
 //
 
 #include "busqueda-local.h"
+#include <sstream>
+#include "cmf-algo-exacto.h"
 //O(n^3)
 Clique& busquedaLocalExtendiendoClique(Clique &clique,
                                        std::vector<std::vector<bool>> &matrizAdyacencias,
@@ -29,4 +31,54 @@ Clique& busquedaLocalExtendiendoClique(Clique &clique,
         }
     }
     return clique;
+}
+
+void porcentajeErrorVariandoMBusquedaLocal(int cantInstanciasPorM, int constanteN, int saltarDeA){
+    std::string nombreArchivo = "prom-acierto-blocal-con-heuristica-mayor-grado-variando-m";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, promedioAciertoBLocal, promedioAciertoHConstructiva, promedioMejoraHConstructiva" << std::endl;
+    int maxM = (constanteN*(constanteN-1))/2;
+    int minM = 1; // Para no dividir por 0 en el promedio
+    std::cout << "Variando m: {n=" << constanteN << "} => " << minM << " <= m <= " << maxM << std::endl;
+    long long promedioErrorGlobal = 0;
+    long long promedioMejoraHConstructivaGlobal = 0;
+    long long cantValores = 0;
+    for (int i = minM; i <= maxM; i+=saltarDeA) {
+        long long promedioAciertoBLocal = 0;
+        long long promedioAciertoHConstructiva = 0;
+        long long promedioMejoraHConstructiva = 0;
+        for (int j = 0; j < cantInstanciasPorM; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(constanteN, i, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+
+            Clique *cliqueConstructiva = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
+            int fronteraCliqueConstrutiva = cliqueConstructiva->frontera;
+
+            Clique busquedaLocal = busquedaLocalExtendiendoClique(*cliqueConstructiva, matrizAdyacencias, listaAdyacencias);
+            promedioMejoraHConstructiva += (busquedaLocal.frontera*100)/fronteraCliqueConstrutiva - 100;
+
+            Clique cliqueExacto = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
+            promedioAciertoBLocal+= (busquedaLocal.frontera*100)/(cliqueExacto.frontera);
+            promedioAciertoHConstructiva+= (fronteraCliqueConstrutiva*100)/(cliqueExacto.frontera);
+            delete cliqueConstructiva;
+        }
+
+        promedioAciertoBLocal = promedioAciertoBLocal/ cantInstanciasPorM;
+        promedioAciertoHConstructiva = promedioAciertoHConstructiva/cantInstanciasPorM;
+        promedioMejoraHConstructiva= promedioMejoraHConstructiva/ cantInstanciasPorM;
+        promedioErrorGlobal += promedioAciertoBLocal;
+        promedioMejoraHConstructivaGlobal += promedioMejoraHConstructiva;
+        cantValores++;
+        std::cout << constanteN << ", "<<  i << ", " << promedioAciertoBLocal << ", " << promedioAciertoHConstructiva << ", " << promedioMejoraHConstructiva << std::endl ;
+        a_file  << constanteN << ", "<<  i << ", " << promedioAciertoBLocal << ", " << promedioAciertoHConstructiva << ", " << promedioMejoraHConstructiva << std::endl ;
+    }
+    promedioErrorGlobal = promedioErrorGlobal / cantValores;
+    promedioMejoraHConstructivaGlobal= promedioMejoraHConstructivaGlobal / cantValores;
+
+    a_file.close();
+    std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%. El promedio de mejora de la busqueda local con respecto a la heurístrica constructiva (mayor grado) es " << promedioMejoraHConstructivaGlobal << std::endl;
 }
