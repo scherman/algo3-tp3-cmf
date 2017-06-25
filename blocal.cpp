@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 //    escribirTiemposVariandoNBLocal(5, 20, 10000,30);
 //    escribirTiemposVariandoMBLocal(10, 200, 5);
 //    fronteraEnCasoMaloBLocal(20, 1000, 20);
-
+    
     unsigned n, m;
     stringTokenizer strTok;
     string linea;
