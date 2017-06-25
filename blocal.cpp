@@ -5,8 +5,9 @@
 #include "busqueda-local.h"
 
 int main(int argc, char** argv) {
-    porcentajeErrorVariandoMBusquedaLocal(20, 100, 5);
-
+//    porcentajeErrorVariandoMBusquedaLocal(20, 100, 5);
+    escribirTiemposVariandoNBLocal(5, 20, 10000,30);
+    escribirTiemposVariandoMBLocal(10, 200, 5);
 //    unsigned n, m;
 //    stringTokenizer strTok;
 //    string linea;
