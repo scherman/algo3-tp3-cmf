@@ -24,6 +24,21 @@ int matriz[MAXN][MAXN];
 int x,y;
 int mejortotal;
 
+char* getCmdOption(char ** begin, char ** end, const string & option)
+{
+    char ** itr = find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+        return *itr;
+    }
+    return 0;
+}
+
+bool cmdOptionExists(char** begin, char** end, const string& option)
+{
+    return find(begin, end, option) != end;
+}
+
 struct mayor
 {
     template<class T>
@@ -227,112 +242,72 @@ double busquedalocal(int cap,int greedysolucion)
 
 
 
-int main()
+int main(int argc, char * argv[])
 {
-    //srand(time(NULL));
-    //cout<<"cuantas repeticiones deseas hacer?(insertar el numero de repeticiones correspondiente)"<<endl;
-    int T;
-    //cin >> T;
-    T = 1;
-    while (T-- != 0)
-    {
-        //cout<<"insertar 0 para hacer grasp, 1 para greedy y 2 para busqueda local. Si se introduce otro numero se utilizara greedy como opcion predeterminada"<<endl;
-        int modo;
-        //cin>>modo;
-        modo = 0;
-        int RCL;
-        int locallimite;
-        /*
-        if (modo==0)
-        {
-            cout<<"insertar tamaño del RCL seguido de el limite de iteraciones para la busqueda local"<<endl;
-            cin>>RCL>>locallimite;
-        } else if (modo==1)
-        {
-            cout<<"se utilizara greedy"<<endl;
-        } else if (modo==2)
-        {
-            cout<<"insertar limite de iteraciones para la busquedalocal"<<endl;
-             cin>>locallimite;
-        } else
-        {
-            cout<<"se utilizara greedy"<<endl;
-            modo=1;
-        }
-        */
-        //cout<<"Introducir la entrada para la que se desea correr el algoritmo previamente seleccionado"<<endl;
-        RCL = 1;
-        cin >> n>>m;
-        for (int i = 0; i < n; ++i)
-        {
-             for (int j = 0; j < n; ++j)
-            {
-                matriz[i][j]=0;
-            }
-        }
-        for (int i = 0; i < m; ++i)
-        {
-            cin >> x >> y;
-            matriz[x][y]=1;
-            matriz[y][x]=1;
-        }
+    int RCL = 1;
+    int iterations = 1;
+    int locallimite = 0;
 
-
-
-    //if (modo==0)
-    //{
-            int guardado=randomizedgreedy(RCL);
-            cout<< busquedalocal(locallimite,guardado)<<" ";
-            int contador=0;
-            for (int i = 0; i < n; ++i)
-            {
-                if (incluido[i]==1)  contador++;
-            }
-            cout<<contador<<" ";
-            for (int i = 0; i < n; ++i)
-            {
-                if (incluido[i]==1)  cout<< i<<" ";
-            }
-            cout<<endl;
-/*
-    } else if (modo==1)
-    {
-            int guardado=randomizedgreedy(1);
-            cout<< guardado<<" ";
-            int contador=0;
-            for (int i = 0; i < n; ++i)
-            {
-                if (incluido[i]==1)  contador++;
-            }
-            cout<<contador<<" ";
-            for (int i = 0; i < n; ++i)
-            {
-                if (incluido[i]==1)  cout<< i<<" ";
-            }
-            cout<<endl;
-
-    }
-     else if (modo==2)
-    {
-         int guardado=randomizedgreedy(1);
-            cout<< busquedalocal(locallimite,guardado)<<" ";
-            int contador=0;
-            for (int i = 0; i < n; ++i)
-            {
-                if (incluido[i]==1)  contador++;
-            }
-            cout<<contador<<" ";
-            for (int i = 0; i < n; ++i)
-            {
-                if (incluido[i]==1)  cout<< i<<" ";
-            }
-            cout<<endl;
-
+    if(cmdOptionExists(argv, argv+argc, "--rcl")) {
+        char* rclOption = getCmdOption(argv, argv + argc, "--rcl");
+        RCL = stoi(rclOption);
     }
 
-
-*/
-
+    if(cmdOptionExists(argv, argv+argc, "--search")) {
+        char* locallimiteOption = getCmdOption(argv, argv + argc, "--search");
+        locallimite = stoi(locallimiteOption);
     }
-     return 0;
+
+    if(cmdOptionExists(argv, argv+argc, "--iterations")) {
+        char* iterationsOption = getCmdOption(argv, argv + argc, "--iterations");
+        iterations = stoi(iterationsOption);
+    }
+
+    cin >> n >> m;
+    for (int i = 0; i < n; ++i)
+    {
+         for (int j = 0; j < n; ++j)
+        {
+            matriz[i][j]=0;
+        }
+    }
+    for (int i = 0; i < m; ++i)
+    {
+        cin >> x >> y;
+        matriz[x][y]=1;
+        matriz[y][x]=1;
+    }
+
+    int maxFrontera = -1;
+    vector<int> cliqueMaxFrontera;
+    for (int it = 0; it < iterations; it++)
+    {
+        int guardado = randomizedgreedy(RCL);
+        int fronteraActual = busquedalocal(locallimite,guardado);
+
+        if (fronteraActual > maxFrontera)
+        {
+            cliqueMaxFrontera.clear();
+            for (int i = 0; i < n; ++i)
+            {
+                if (incluido[i] == 1)
+                {
+                    cliqueMaxFrontera.push_back(i);
+                }
+            }
+            maxFrontera = fronteraActual;
+        }
+    }
+
+    cout<< maxFrontera << " ";
+    cout<< cliqueMaxFrontera.size() << " ";
+
+    for (vector<int>::iterator cliqueIt = cliqueMaxFrontera.begin(); cliqueIt != cliqueMaxFrontera.end(); ++cliqueIt)
+    {
+        cout << *cliqueIt << " ";
+    }
+
+    cout << endl;
+
+    return 0;
 }
