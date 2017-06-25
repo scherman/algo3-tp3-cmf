@@ -2,23 +2,20 @@ from subprocess32 import Popen, PIPE, STDOUT
 from os import path
 import resource
 
-previous_program_time = 0
 project_root = path.abspath(path.join(path.dirname(__file__), '../..'))
-
-def previous_program_time_set(x):
-    global previous_program_time
-    previous_program_time = x
-
 
 def run_algorithm(instance, runner):
     runner_file = path.join(project_root, "bin", runner)
     process = Popen([runner_file], stdout=None, stdin=PIPE, stderr=STDOUT)
     process_input = instance
-    process.communicate(input=bytearray(process_input))
 
-    current_program_time = resource.getrusage(resource.RUSAGE_CHILDREN).ru_utime
-    algorithm_time = current_program_time - previous_program_time
-    previous_program_time_set(current_program_time)
+    # Measurement sandwich
+    pre_run_program_time = resource.getrusage(resource.RUSAGE_CHILDREN).ru_utime
+    process.communicate(input=bytearray(process_input))
+    post_run_program_time = resource.getrusage(resource.RUSAGE_CHILDREN).ru_utime
+
+    algorithm_time = post_run_program_time - pre_run_program_time
+
     return algorithm_time
 
 

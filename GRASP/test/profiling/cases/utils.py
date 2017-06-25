@@ -16,25 +16,26 @@ def stringify(graph):
 
 
 def cache_try_load(key):
-    def load():
-        with open(os.path.join('./.cache', key), 'r') as cache:
-            for line in cache:
-                parsed_line = line.split(' ', 1)
-                instance_key = parsed_line[0]
-                instance_content = literal_eval(parsed_line[1])
-                yield (instance_key, instance_content)
+    instances = dict()
 
-    if not os.path.exists(os.path.join('./.cache', key)):
-        return None
-    else:
-        return load
+    if not os.path.exists(os.path.join('./.cache', '_' + key)):
+        return instances
+
+    with open(os.path.join('./.cache', '_' + key), 'r') as cache:
+        for line in cache:
+            parsed_line = line.split(' ', 1)
+            instance_key = parsed_line[0]
+            instance_content = literal_eval(parsed_line[1])
+            instances[instance_key] = instance_content
+
+    return instances
 
 def cache_save(key, instance):
     if not os.path.exists('./.cache'):
         os.makedirs('./.cache')
 
-    with open(os.path.join('./.cache', key), 'a') as cache:
+    with open(os.path.join('./.cache', '_' + key), 'a') as cache:
         cache.write("""{key} {content} \n""".format(key=instance[0], content=repr(instance[1])))
 
-    with open(os.path.join('./.cache', key + '.debug'), 'w') as cache:
+    with open(os.path.join('./.cache', '_' + key + '.debug'), 'w') as cache:
         cache.write(instance[1])
