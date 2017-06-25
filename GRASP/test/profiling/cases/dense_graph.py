@@ -1,11 +1,10 @@
 import sys
-import inspect
 from os import path
 sys.path.insert(0, path.abspath(path.join(path.dirname(__file__), '../..')))
 
 from tools.csv_tools import write_csv, rows_to_columns
 from tools.profiler import profile_instances, run_algorithm
-#from tools.graph import DenseGraphBuilder - uncomment if you have graph_tool
+from tools.graph import DenseGraphBuilder
 from utils import *
 from itertools import chain, imap
 
@@ -38,7 +37,7 @@ def extractor(output):
 
 
 def calculate_results(min_n, max_n, density, precision, filename):
-    results = profile_instances(generator(min_n, max_n, density, filename), precision=precision, runner='exact', extractor=extractor)
+    results = profile_instances(generator(min_n, max_n, density, filename), precision=precision, runner='grasp', extractor=extractor)
 
     write_csv("""../results/{filename}.csv""".format(filename=filename),
         chain(
@@ -47,5 +46,7 @@ def calculate_results(min_n, max_n, density, precision, filename):
         )
     )
 
-calculate_results(1, 24, 0.6, 20, 'dense_graph_exact')
-calculate_results(1, 24, 0.4, 20, 'sparse_dense_exact')
+calculate_results(1, 24, 1.0, 20, 'complete_graph_grasp')
+calculate_results(1, 24, 0.8, 20, 'very_dense_graph_grasp')
+calculate_results(1, 24, 0.6, 20, 'dense_graph_grasp')
+calculate_results(1, 24, 0.4, 20, 'sparse_graph_grasp')

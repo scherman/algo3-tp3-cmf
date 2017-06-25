@@ -1,22 +1,16 @@
-import sys
-import inspect
-from os import path
-sys.path.insert(0, path.abspath(path.join(path.dirname(__file__), '../..')))
+from functools import partial
+from generators.dense_graph import generate_instance
+from generators.utils import calculate_results
 
-from tools.csv_tools import write_csv, rows_to_columns
-from tools.profiler import profile_instances, run_algorithm
-from tools.graph import DenseGraphBuilder
-from utils import *
 
-def generator():
-    def g():
-        graph = DenseGraphBuilder() \
-            .with_n(3) \
-            .with_m(1) \
-            .build()
-        result = (1, stringify(graph))
-        yield result
+def generate(key):
+    return key, [generate_instance(key, density=1.0), '--search', '1']
 
-    return g
-
-print run_algorithm(generator()().next()[1], 'exact')
+calculate_results(
+    variable='n',
+    instances=[n for n in range(1, 24 + 1)],
+    generate=generate,
+    runner='grasp',
+    precision=20,
+    case_name='example'
+)
