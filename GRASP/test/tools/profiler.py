@@ -6,49 +6,51 @@ project_root = path.abspath(path.join(path.dirname(__file__), '../..'))
 
 def run_algorithm(instance, runner):
     runner_file = path.join(project_root, "bin", runner)
-    process = Popen([runner_file], stdout=None, stdin=PIPE, stderr=STDOUT)
+    process = Popen([runner_file], stdout=PIPE, stdin=PIPE, stderr=None)
     process_input = instance
 
     # Measurement sandwich
     pre_run_program_time = resource.getrusage(resource.RUSAGE_CHILDREN).ru_utime
-    process.communicate(input=bytearray(process_input))
+    result = process.communicate(input=bytearray(process_input))
     post_run_program_time = resource.getrusage(resource.RUSAGE_CHILDREN).ru_utime
 
+    stdout = result[0]
     algorithm_time = post_run_program_time - pre_run_program_time
 
-    return algorithm_time
+    return stdout, algorithm_time
 
 
 def profile_algorithm(instance, runs, runner):
     results_list = []
+    run_result = None
     for i in range(0, runs):
-        results_list.append(run_algorithm(instance, runner))
-    return average(results_list)
+        (run_result, run_time) = run_algorithm(instance, runner)
+        results_list.append(run_time)
+    return run_result, average(results_list)
 
 
 def average(ls):
     return reduce(lambda x, y: x + y, ls) / len(ls)
 
 
-def calclate_averages(n_results, n_avg_times):
-    n_results_average = average(n_results)
-    n_avg_times.append(n_results_average)
-    del n_results[:]
+def process_result(previous_n, last_result, n_times, extractor):
+    print "Processing " + str(previous_n)
+    print last_result
+    return previous_n, extractor(last_result), average(n_times)
 
 
-def profile_instances(generator, precision, runner):
+def profile_instances(generator, precision, runner, extractor):
     previous_n = -1
-    n_results = []
-    n_avg_times = []
+    n_times = []
+    last_result = None
     for (current_n, instance) in generator():
         if previous_n >= 0 and previous_n != current_n:
-            calclate_averages(n_results, n_avg_times)
+            yield process_result(previous_n, last_result, n_times, extractor)
+            del n_times[:]
 
         previous_n = current_n
 
-        result = profile_algorithm(instance, precision, runner)
-        n_results.append(result)
+        (last_result, average_run_time) = profile_algorithm(instance, precision, runner)
+        n_times.append(average_run_time)
 
-    calclate_averages(n_results, n_avg_times)
-
-    return n_avg_times
+    yield process_result(previous_n, last_result, n_times, extractor)
