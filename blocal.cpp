@@ -3,11 +3,14 @@
 //
 
 #include "busqueda-local.h"
+#include "cmf-heuristica-blocal.h"
 
 int main(int argc, char** argv) {
 //    porcentajeErrorVariandoMBusquedaLocal(20, 100, 5);
 //    escribirTiemposVariandoNBLocal(5, 20, 10000,30);
 //    escribirTiemposVariandoMBLocal(10, 200, 5);
+//    fronteraEnCasoMaloBLocal(20, 1000, 20);
+
     unsigned n, m;
     stringTokenizer strTok;
     string linea;

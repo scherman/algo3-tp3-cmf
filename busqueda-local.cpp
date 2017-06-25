@@ -12,7 +12,8 @@ Clique& busquedaLocalExtendiendoClique(Clique &clique,
                                        std::vector<std::list<int>> &listaIncidencias) {
     int n = listaIncidencias.size();
 
-    bool nodosEnClique[n] = {false};
+    bool nodosEnClique[n];
+    for(int i = 0; i < n; i++) nodosEnClique[i] = false;
     for (std::list<int>::iterator it = clique.vertices.begin(); it != clique.vertices.end(); ++it) {
         nodosEnClique[*it] = true;
     }
