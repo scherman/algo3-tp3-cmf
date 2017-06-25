@@ -8,7 +8,6 @@ set(SOURCE_FILES_2 cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constru
 set(SOURCE_FILES_3 cmf-algo-exacto.cpp cmf-algo-exacto.h cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constructiva-golosa.h busqueda-local.cpp busqueda-local.h meta-heuristica.cpp meta-heuristica.h experimentos.cpp)
 set(SOURCE_FILES_4 cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constructiva-golosa.h busqueda-local.h busqueda-local.cpp blocal.cpp cmf-algo-exacto.cpp cmf-algo-exacto.h)
 set(SOURCE_FILES_5 cmf-heuristica-constructiva-golosa.cpp cmf-heuristica-constructiva-golosa.h busqueda-local.h busqueda-local.cpp meta-heuristica.h meta-heuristica.cpp mheuristica.cpp)
-set(SOURCE_FILES_6 cmf-algo-exacto.cpp exacto_stdin.cpp cmf-algo-exacto.h)
 
 add_executable(exacto ${SOURCE_FILES_1})
 add_executable(hconstructiva ${SOURCE_FILES_2})
@@ -17,5 +16,4 @@ add_executable(blocal ${SOURCE_FILES_4})
 add_executable(mheuristica ${SOURCE_FILES_5})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/GRASP/bin)
-add_executable(exact ${SOURCE_FILES_6})
 
