@@ -4,6 +4,7 @@
 
 #include "busqueda-local.h"
 #include <sstream>
+#include <chrono>
 #include "cmf-algo-exacto.h"
 //O(n^3)
 Clique& busquedaLocalExtendiendoClique(Clique &clique,
@@ -81,4 +82,73 @@ void porcentajeErrorVariandoMBusquedaLocal(int cantInstanciasPorM, int constante
 
     a_file.close();
     std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%. El promedio de mejora de la busqueda local con respecto a la heurístrica constructiva (mayor grado) es " << promedioMejoraHConstructivaGlobal << std::endl;
+}
+
+void escribirTiemposVariandoNBLocal(int cantInstanciasPorN, int minN, int maxN, int saltarDeA){
+    std::string nombreArchivo = "tiempos-blocal-mayor-grado-variando-n";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, tiempoTotal" << std::endl;
+
+    int m = minN*(minN-1)/2;
+    std::cout << "Variando n: {m=" << m << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique *clique = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            busquedaLocalExtendiendoClique(*clique, matrizAdyacencias, listaAdyacencias);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+            delete clique;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " <<  tiempoTotal << std::endl ;
+        a_file << i <<  ", " << m << ", " << tiempoTotal << std::endl;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void escribirTiemposVariandoMBLocal(int cantInstanciasPorM, int constanteN, int saltarDeA){
+    std::string nombreArchivo = "tiempos-blocal-mayor-grado-variando-m";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, tiempoTotal" << std::endl;
+    int maxM = (constanteN*(constanteN-1))/2;
+    int minM = 0;
+    std::cout << "Variando m: {n=" << constanteN << "} => " << minM << " <= m <= " << maxM << std::endl;
+    for (int i = minM; i <= maxM; i+=saltarDeA) {
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorM; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(constanteN, i, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique *clique = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            busquedaLocalExtendiendoClique(*clique, matrizAdyacencias, listaAdyacencias);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+            delete clique;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorM;
+        std::cout << constanteN << ", "<<  i << ", " << tiempoTotal << std::endl ;
+        a_file << constanteN << ", "<< i << ", " << tiempoTotal << std::endl;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
 }
