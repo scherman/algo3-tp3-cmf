@@ -176,7 +176,7 @@ public:
         }
 
         //el nodo 2k+1 estará conectado con los siguientes k-1
-        for(int i = 2*k+1; i <= 3*k; i++){
+        for(int i = 2*k+2; i <= 3*k; i++){
             listaAdyacencias[2*k+1].push_back(i);
             listaAdyacencias[i].push_back(2*k+1);
         }
@@ -185,7 +185,7 @@ public:
         listaAdyacencias[k+1].push_back(2*k+1);
         listaAdyacencias[2*k+1].push_back(k+1);
 
-        return aListaIncidencias(listaAdyacencias);
+        return listaAdyacencias;
     }
 
 private:
