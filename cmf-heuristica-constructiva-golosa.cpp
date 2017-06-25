@@ -3,6 +3,7 @@
 //
 
 #include "cmf-heuristica-constructiva-golosa.h"
+#include "busqueda-local.h"
 #include <sstream>
 #include <chrono>
 #include "cmf-algo-exacto.h"
@@ -62,7 +63,8 @@ Clique* hconstructiva(std::vector<std::vector<bool>> &matrizAdyacencias,
         actual = nodoInicial;
     }
 
-    Clique *cliques[n] = {nullptr};
+    Clique *cliques[n];
+    for(int i = 0; i < n; i++) cliques[i] = nullptr;
     std::list<int> V;
     V.push_back(actual);
     cliques[actual] = new Clique(V, listaAdyacencias[actual].size());
@@ -235,3 +237,4 @@ void porcentajeErrorVariandoMHeuristicaMayorGrado(int cantInstanciasPorM, int co
     a_file.close();
     std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
 }
+

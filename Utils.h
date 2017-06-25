@@ -8,6 +8,7 @@
 #include "Eje.h"
 #include <list>
 #include <iostream>
+#include <stdexcept>
 #include <random>
 
 class Utils {
