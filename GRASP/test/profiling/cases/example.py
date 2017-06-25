@@ -11,8 +11,8 @@ from utils import *
 def generator():
     def g():
         graph = DenseGraphBuilder() \
-            .with_n(20) \
-            .with_m(190) \
+            .with_n(3) \
+            .with_m(1) \
             .build()
         result = (1, stringify(graph))
         yield result

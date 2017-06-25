@@ -1,5 +1,5 @@
 import csv
-
+from itertools import izip, imap
 
 def write_csv(csv_file_name, results):
     with open(csv_file_name, 'wb') as csv_file:
@@ -10,4 +10,4 @@ def write_csv(csv_file_name, results):
 
 
 def rows_to_columns(matrix):
-    return [list(x) for x in zip(*matrix)]
+    return imap(list, izip(*matrix))

@@ -159,6 +159,35 @@ public:
         return listaAdyacencias;
     }
 
+    static std::vector<std::list<int>> genCasoMaloBLocal(int k){
+
+        std::vector<std::list<int>> listaAdyacencias((k+1) + 2*k, std::list<int>());
+
+        //el nodo 0 estará conectado con los siguientes k nodos
+        for(int i = 1; i <= k; i++){
+            listaAdyacencias[0].push_back(i);
+            listaAdyacencias[i].push_back(0);
+        }
+
+        //el nodo k+1 estará conectado con los siguientes k-1 nodos
+        for(int i = k + 2; i <= 2*k; i++){
+            listaAdyacencias[k+1].push_back(i);
+            listaAdyacencias[i].push_back(k+1);
+        }
+
+        //el nodo 2k+1 estará conectado con los siguientes k-1
+        for(int i = 2*k+1; i <= 3*k; i++){
+            listaAdyacencias[2*k+1].push_back(i);
+            listaAdyacencias[i].push_back(2*k+1);
+        }
+
+        //los nodos k+1 y 2k+1 estarán conectados entre sí
+        listaAdyacencias[k+1].push_back(2*k+1);
+        listaAdyacencias[2*k+1].push_back(k+1);
+
+        return aListaIncidencias(listaAdyacencias);
+    }
+
 private:
 
 };
