@@ -4,7 +4,7 @@ from generators.utils import calculate_results
 
 
 def generate(key):
-    return key, [generate_instance(key, density=1.0), '--search', '1']
+    return key, [generate_instance(key, density=0.5), '--search', '1']
 
 calculate_results(
     variable='n',

@@ -245,6 +245,7 @@ double busquedalocal(int cap,int greedysolucion)
 int main(int argc, char * argv[])
 {
     int RCL = 1;
+    int iterations = 1;
     int locallimite = 0;
 
     if(cmdOptionExists(argv, argv+argc, "--rcl")) {
@@ -257,7 +258,12 @@ int main(int argc, char * argv[])
         locallimite = stoi(locallimiteOption);
     }
 
-    cin >> n >>m;
+    if(cmdOptionExists(argv, argv+argc, "--iterations")) {
+        char* iterationsOption = getCmdOption(argv, argv + argc, "--iterations");
+        iterations = stoi(iterationsOption);
+    }
+
+    cin >> n >> m;
     for (int i = 0; i < n; ++i)
     {
          for (int j = 0; j < n; ++j)
@@ -272,19 +278,36 @@ int main(int argc, char * argv[])
         matriz[y][x]=1;
     }
 
-    int guardado=randomizedgreedy(RCL);
-    cout<< busquedalocal(locallimite,guardado)<<" ";
-    int contador=0;
-    for (int i = 0; i < n; ++i)
+    int maxFrontera = -1;
+    vector<int> cliqueMaxFrontera;
+    for (int it = 0; it < iterations; it++)
     {
-        if (incluido[i]==1)  contador++;
+        int guardado = randomizedgreedy(RCL);
+        int fronteraActual = busquedalocal(locallimite,guardado);
+
+        if (fronteraActual > maxFrontera)
+        {
+            cliqueMaxFrontera.clear();
+            for (int i = 0; i < n; ++i)
+            {
+                if (incluido[i] == 1)
+                {
+                    cliqueMaxFrontera.push_back(i);
+                }
+            }
+            maxFrontera = fronteraActual;
+        }
     }
-    cout<<contador<<" ";
-    for (int i = 0; i < n; ++i)
+
+    cout<< maxFrontera << " ";
+    cout<< cliqueMaxFrontera.size() << " ";
+
+    for (vector<int>::iterator cliqueIt = cliqueMaxFrontera.begin(); cliqueIt != cliqueMaxFrontera.end(); ++cliqueIt)
     {
-        if (incluido[i]==1)  cout<< i<<" ";
+        cout << *cliqueIt << " ";
     }
-    cout<<endl;
+
+    cout << endl;
 
     return 0;
 }
