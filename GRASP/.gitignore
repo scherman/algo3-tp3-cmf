@@ -1,0 +1,12 @@
+# Exclude compilation folders
+build/
+bin/
+
+# Python
+*.pyc
+.ipynb_checkpoints/
+.cache/
+
+
+
+
