@@ -54,7 +54,7 @@ void compararTiemposVariandoM(int cantInstanciasPorM, int constanteN, int saltar
             {
                 // Tomar tiempo grasp
                 auto tpi = std::chrono::high_resolution_clock::now();
-                grasp(constanteN, i, matrizAdyacencias, 20, 20000, 5);
+                grasp(constanteN, i, matrizAdyacencias, 3, 20, 1000);
                 auto tpf = std::chrono::high_resolution_clock::now();
                 auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
                 tiempoTotalGrasp+= tiempo;
@@ -80,7 +80,7 @@ void compararTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN, int sa
     ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
     std::ofstream a_file (ss.str());
 
-    a_file << "n, m, tiempoTotal" << std::endl;
+    a_file << "n, m, tiempoTotalHConstructiva, tiempoTotalBLocal, tiempoTotalGraspK5, tiempoTotalGraspK25, tiempoTotalGraspKN" << std::endl;
 
     int m = minN*(minN-1)/2;
     std::cout << "Variando n: {m=" << m << "} => " << minN << " <= n <= " << maxN << std::endl;
@@ -88,7 +88,9 @@ void compararTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN, int sa
 
         long long tiempoTotalHConstructiva = 0;
         long long tiempoTotalBLocal = 0;
-        long long tiempoTotalGrasp = 0;
+        long long tiempoTotalGraspK5 = 0;
+        long long tiempoTotalGraspK25 = 0;
+        long long tiempoTotalGraspKN = 0;
         for (int j = 0; j < cantInstanciasPorN; ++j) {
             std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
             std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
@@ -116,17 +118,35 @@ void compararTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN, int sa
             {
                 // Tomar tiempo grasp
                 auto tpi = std::chrono::high_resolution_clock::now();
-                grasp(i, m, matrizAdyacencias, 20, 20000, 5);
+                grasp(i, m, matrizAdyacencias, 5, 20, 1000);
                 auto tpf = std::chrono::high_resolution_clock::now();
                 auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
-                tiempoTotalGrasp+= tiempo;
+                tiempoTotalGraspK5+= tiempo;
+            }
+            {
+                // Tomar tiempo grasp
+                auto tpi = std::chrono::high_resolution_clock::now();
+                grasp(i, m, matrizAdyacencias, 25, 20, 1000);
+                auto tpf = std::chrono::high_resolution_clock::now();
+                auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+                tiempoTotalGraspK25+= tiempo;
+            }
+            {
+                // Tomar tiempo grasp
+                auto tpi = std::chrono::high_resolution_clock::now();
+                grasp(i, m, matrizAdyacencias, i, 20, 1000);
+                auto tpf = std::chrono::high_resolution_clock::now();
+                auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+                tiempoTotalGraspKN+= tiempo;
             }
         }
         tiempoTotalHConstructiva = tiempoTotalHConstructiva/ cantInstanciasPorN;
         tiempoTotalBLocal = tiempoTotalBLocal / cantInstanciasPorN;
-        tiempoTotalGrasp = tiempoTotalGrasp/ cantInstanciasPorN;
-        std::cout << i << ", "<< m << ", " << tiempoTotalHConstructiva << ", " << tiempoTotalBLocal << ", " << tiempoTotalGrasp << std::endl ;
-        a_file << i << ", "<< m << ", " << tiempoTotalHConstructiva << ", " << tiempoTotalBLocal << ", " << tiempoTotalGrasp << std::endl;
+        tiempoTotalGraspK5 = tiempoTotalGraspK5/ cantInstanciasPorN;
+        tiempoTotalGraspK25 = tiempoTotalGraspK25 / cantInstanciasPorN;
+        tiempoTotalGraspKN = tiempoTotalGraspKN / cantInstanciasPorN;
+        std::cout << i << ", "<< m << ", " << tiempoTotalHConstructiva << ", " << tiempoTotalBLocal << ", " << tiempoTotalGraspK5 << ", " << tiempoTotalGraspK25  << ", " << tiempoTotalGraspKN << std::endl ;
+        a_file << i << ", "<< m << ", " << tiempoTotalHConstructiva << ", " << tiempoTotalBLocal << ", "  << tiempoTotalGraspK5 << ", " << tiempoTotalGraspK25  << ", " << tiempoTotalGraspKN << std::endl ;
     }
 
     a_file.close();
@@ -134,20 +154,22 @@ void compararTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN, int sa
 }
 
 void compararFronteras(int cantInstanciasPorM, int constanteN, int saltarDeA){
-    std::string nombreArchivo = "prom-acierto-todos-variando-m";
+    std::string nombreArchivo = "frontera-todos-variando-m";
 
     std::stringstream ss;
     ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
     std::ofstream a_file (ss.str());
 
-    a_file << "n, m, fronteraHConstructiva, fronteraBLocal, fronteraGrasp" << std::endl;
+    a_file << "n, m, fronteraHConstructiva, fronteraBLocal, fronteraGraspK5, fronteraGraspK25, fronteraGraspKN" << std::endl;
     int maxM = (constanteN*(constanteN-1))/2;
     int minM = 1; // Para no dividir por 0 en el promedio
     std::cout << "Variando m: {n=" << constanteN << "} => " << minM << " <= m <= " << maxM << std::endl;
     for (int i = minM; i <= maxM; i+=saltarDeA) {
         long long fronteraBLocalTotal = 0;
         long long fronteraHConstructivaTotal = 0;
-        long long fronteraGraspTotal = 0;
+        long long fronteraGraspK5Total = 0;
+        long long fronteraGraspK25Total = 0;
+        long long fronteraGraspKNTotal = 0;
         for (int j = 0; j < cantInstanciasPorM; ++j) {
             std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(constanteN, i, false, 0, 0);
             std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
@@ -157,29 +179,86 @@ void compararFronteras(int cantInstanciasPorM, int constanteN, int saltarDeA){
 
             Clique busquedaLocal = busquedaLocalExtendiendoClique(*cliqueConstructiva, matrizAdyacencias, listaAdyacencias);
 
-            Clique graspClique = grasp(constanteN, i, matrizAdyacencias, 20, 1000, 5);
+            Clique graspCliqueK5 = grasp(constanteN, i, matrizAdyacencias, 5, 20, 1000);
+            Clique graspCliqueKN = grasp(constanteN, i, matrizAdyacencias, constanteN, 20, 1000);
+            Clique graspCliqueK25 = grasp(constanteN, i, matrizAdyacencias, 25, 20, 1000);
 
 
             fronteraBLocalTotal+= busquedaLocal.frontera;
             fronteraHConstructivaTotal+= fronteraCliqueConstrutiva;
-            fronteraGraspTotal+= graspClique.frontera;
+            fronteraGraspK5Total+= graspCliqueK5.frontera;
+            fronteraGraspK25Total+= graspCliqueK25.frontera;
+            fronteraGraspKNTotal+= graspCliqueKN.frontera;
 
             delete cliqueConstructiva;
         }
 
         fronteraBLocalTotal = fronteraBLocalTotal/ cantInstanciasPorM;
         fronteraHConstructivaTotal = fronteraHConstructivaTotal/cantInstanciasPorM;
-        fronteraGraspTotal = fronteraGraspTotal/cantInstanciasPorM;
-        std::cout << constanteN << ", "<<  i << ", " << fronteraHConstructivaTotal << ", " << fronteraBLocalTotal << ", " << fronteraGraspTotal << std::endl;
-        a_file << constanteN << ", "<<  i << ", " << fronteraHConstructivaTotal << ", " << fronteraBLocalTotal << ", " << fronteraGraspTotal << std::endl;
+        fronteraGraspK5Total = fronteraGraspK5Total/cantInstanciasPorM;
+        fronteraGraspK25Total = fronteraGraspK25Total/cantInstanciasPorM;
+        fronteraGraspKNTotal = fronteraGraspKNTotal/cantInstanciasPorM;
+        std::cout << constanteN << ", "<<  i << ", " << fronteraHConstructivaTotal << ", " << fronteraBLocalTotal << ", " << fronteraGraspK5Total << ", "<< fronteraGraspK25Total << ", " << fronteraGraspKNTotal << std::endl;
+        a_file << constanteN << ", "<<  i << ", " << fronteraHConstructivaTotal << ", " << fronteraBLocalTotal << ", " << fronteraGraspK5Total << ", "<< fronteraGraspK25Total << ", " << fronteraGraspKNTotal << std::endl;
+    }
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void compararFronterasVariandoN(int cantInstanciasPorN, int minN, int maxN, int saltarDeA){
+    std::string nombreArchivo = "frontera-todos-variando-n";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, fronteraHConstructiva, fronteraBLocal, fronteraGraspK5, fronteraGraspK25, fronteraGraspKN" << std::endl;
+    int m = minN*(minN-1)/2;
+    std::cout << "Variando n: {m=" << m << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+        long long fronteraBLocalTotal = 0;
+        long long fronteraHConstructivaTotal = 0;
+        long long fronteraGraspK5Total = 0;
+        long long fronteraGraspK25Total = 0;
+        long long fronteraGraspKNTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+
+            Clique *cliqueConstructiva = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
+            int fronteraCliqueConstrutiva = cliqueConstructiva->frontera;
+
+            Clique busquedaLocal = busquedaLocalExtendiendoClique(*cliqueConstructiva, matrizAdyacencias, listaAdyacencias);
+
+            Clique graspCliqueK5 = grasp(i, m, matrizAdyacencias, 5, 20, 1000);
+            Clique graspCliqueKN = grasp(i, m, matrizAdyacencias, i, 20, 1000);
+            Clique graspCliqueK25 = grasp(i, m, matrizAdyacencias, 25, 20, 1000);
+
+
+            fronteraBLocalTotal+= busquedaLocal.frontera;
+            fronteraHConstructivaTotal+= fronteraCliqueConstrutiva;
+            fronteraGraspK5Total+= graspCliqueK5.frontera;
+            fronteraGraspK25Total+= graspCliqueK25.frontera;
+            fronteraGraspKNTotal+= graspCliqueKN.frontera;
+
+            delete cliqueConstructiva;
+        }
+
+        fronteraBLocalTotal = fronteraBLocalTotal/ cantInstanciasPorN;
+        fronteraHConstructivaTotal = fronteraHConstructivaTotal/cantInstanciasPorN;
+        fronteraGraspK5Total = fronteraGraspK5Total/cantInstanciasPorN;
+        fronteraGraspK25Total = fronteraGraspK25Total/cantInstanciasPorN;
+        fronteraGraspKNTotal = fronteraGraspKNTotal/cantInstanciasPorN;
+        std::cout << i<< ", "<<  m << ", " << fronteraHConstructivaTotal << ", " << fronteraBLocalTotal << ", " << fronteraGraspK5Total << ", "<< fronteraGraspK25Total << ", " << fronteraGraspKNTotal << std::endl;
+        a_file << i<< ", "<<  m<< ", " << fronteraHConstructivaTotal << ", " << fronteraBLocalTotal << ", " << fronteraGraspK5Total << ", "<< fronteraGraspK25Total << ", " << fronteraGraspKNTotal << std::endl;
     }
     a_file.close();
     std::cout << "Listo!" << std::endl;
 }
 
 int main(int argc, char** argv) {
-    compararFronteras(20, 100, 5);
-//    compararTiemposVariandoM(3, 10, 1);
-//    compararTiemposVariandoN(3, 10, 100, 1);
+//    compararFronteras(3, 100, 5);
+//    compararTiemposVariandoM(3, 100, 1);
+    compararFronterasVariandoN(3, 50, 10000, 20);
     return 0;
 }
