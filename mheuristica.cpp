@@ -8,8 +8,8 @@
 
 int main(int argc, char** argv) {
     int RCL = 1;
-    int iterations = 1;
-    int locallimite = 0;
+    int iterations = 20;
+    int locallimite = 1000;
 
     unsigned n, m;
     stringTokenizer strTok;
