@@ -7,4 +7,4 @@
 
 
 
-void fronteraEnCasoMaloBLocal();
+void fronteraEnCasoMaloBLocal(int, int, int);
