@@ -1,18 +1,4 @@
-#include <iostream>
-#include <algorithm>
-#include <vector>
-#include <cmath>
-#include <climits>
-#include <stdio.h>
-#include <string.h>
-#include <cfloat>
-#include <queue>
-#include <limits>
-#include <utility>
-#include <stdlib.h>
-#include <time.h>
-#include <functional>
-#include "Clique.h"
+#include "grasp.h"
 
 using namespace std;
 
@@ -22,7 +8,7 @@ typedef long long int64;
 
 //int adyacenciacantidad;
 //int matriz[MAXN][MAXN];
-int x,y;
+//int x,y;
 //int mejortotal;
 
 char* getCmdOption(char ** begin, char ** end, const string & option)
