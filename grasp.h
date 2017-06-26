@@ -5,6 +5,6 @@
 #ifndef TEST_DEBUGGER_GRASP_H_H
 #define TEST_DEBUGGER_GRASP_H_H
 
-double randomizedgreedy(int mejorescandidatos, int n, int m);
+Clique grasp(int n, int m, std::vector<std::vector<bool>> &matriz, int RCL, int iterations, int search);
 
 #endif //TEST_DEBUGGER_GRASP_H_H

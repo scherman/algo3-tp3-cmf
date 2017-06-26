@@ -12,17 +12,18 @@
 #include <stdlib.h>
 #include <time.h>
 #include <functional>
+#include "Clique.h"
 
 using namespace std;
 
 typedef long long int64;
-int const MAXN = 1000;
+//int const MAXN = 1000;
 
-int incluido[MAXN];
-int adyacenciacantidad;
-int matriz[MAXN][MAXN];
+
+//int adyacenciacantidad;
+//int matriz[MAXN][MAXN];
 int x,y;
-int mejortotal;
+//int mejortotal;
 
 char* getCmdOption(char ** begin, char ** end, const string & option)
 {
@@ -45,14 +46,14 @@ struct mayor
     bool operator()(T const &a, T const &b) const { return a > b; }
 };
 
-double randomizedgreedy(int mejorescandidatos, int n, int m) //para hacer greedy normal llamarlo con el parametro en 1
+double randomizedgreedy(std::vector<std::vector<bool>> &matriz, int mejorescandidatos, int n, int m, int incluido[], int &adyacenciacantidad) //para hacer greedy normal llamarlo con el parametro en 1
 {
     int agrandar=1;
     for (int z=0;z<n;z++)
     {
         incluido[z]=false;
     }
-    mejortotal=0;
+    int mejortotal=0;
     int numerodebucles=0;
     while (agrandar==1)
     {
@@ -108,7 +109,7 @@ double randomizedgreedy(int mejorescandidatos, int n, int m) //para hacer greedy
     return mejortotal;
 }
 
-double busquedalocal(int cap,int greedysolucion, int n, int m)
+double busquedalocal(std::vector<std::vector<bool>> &matriz, int cap,int greedysolucion, int n, int m, int incluido[], int &adyacenciacantidad)
 {
     int limite=0;
     int modificado=1;
@@ -239,3 +240,37 @@ double busquedalocal(int cap,int greedysolucion, int n, int m)
     }
     return mejortotal;
 }
+
+Clique grasp(int n, int m, std::vector<std::vector<bool>> &matriz, int RCL, int iterations, int search){
+    int const MAXN = 1000;
+    int incluido[MAXN];
+    int maxFrontera = -1;
+    vector<int> cliqueMaxFrontera;
+    int adyacenciacantidad = 0;
+    for (int it = 0; it < iterations; it++)
+    {
+        int guardado = randomizedgreedy(matriz, RCL, n, m, incluido, adyacenciacantidad);
+        int fronteraActual = busquedalocal(matriz, search,guardado,n,m, incluido, adyacenciacantidad);
+
+        if (fronteraActual > maxFrontera)
+        {
+            cliqueMaxFrontera.clear();
+            for (int i = 0; i < n; ++i)
+            {
+                if (incluido[i] == 1)
+                {
+                    cliqueMaxFrontera.push_back(i);
+                }
+            }
+            maxFrontera = fronteraActual;
+        }
+    }
+
+    std::list<int> v;
+    for (vector<int>::iterator cliqueIt = cliqueMaxFrontera.begin(); cliqueIt != cliqueMaxFrontera.end(); ++cliqueIt)
+    {
+        v.push_back(*cliqueIt);
+    }
+    v.push_back(1);
+    return Clique(v, maxFrontera);
+};
