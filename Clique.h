@@ -5,13 +5,14 @@
 #ifndef ALGO3_TP3_CMF_CLIQUE_H
 #define ALGO3_TP3_CMF_CLIQUE_H
 
+#include <iostream>
 #include <list>
 
 struct Clique{
     int frontera;
     std::list<int> vertices;
 
-//    Clique() : frontera(0) {};
+    Clique() : frontera(0) {};
     Clique(std::list<int> vertices, int frontera) : frontera(frontera), vertices(vertices){
 //        std::cout << "Creado " << this << std::endl;
     };
