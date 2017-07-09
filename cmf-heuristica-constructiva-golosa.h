@@ -13,6 +13,8 @@
 #include <fstream>
 #include "stringTokenizer.hpp"
 
+Clique* maxFrontera(int n, Clique **cliques);
+
 bool mejoraFrontera(Clique& clique, int vecino, std::vector<std::list<int>> &listaAdyacencias);
 
 bool extiendeClique(Clique& clique, int vecino, std::vector<std::vector<bool>> &matrizAdyancias, std::vector<std::list<int>> &listaAdyacencias);

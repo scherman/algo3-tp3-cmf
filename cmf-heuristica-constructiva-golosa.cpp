@@ -9,6 +9,39 @@
 #include "cmf-algo-exacto.h"
 
 
+// Devuelve la clique de max frontera en 'cliques'. Borra las otras
+Clique* maxFrontera(int n, Clique **cliques) {
+    Clique *maxClique = nullptr;
+    for (int j = 0; j < n; ++j) {
+        Clique *cliqueActual = cliques[j];
+        if (cliqueActual == nullptr) continue;
+//        if (cliques[j] == nullptr){
+//            continue;
+//        }  else {
+//            std::cout << "v=" << j << ":" << *cliques[j] << std::endl;
+//        }
+        if (maxClique == nullptr) maxClique = cliqueActual;
+
+        if (maxClique->frontera < cliqueActual->frontera) {
+            for (std::list<int>::iterator it = maxClique->vertices.begin(); it != maxClique->vertices.end(); ++it) {
+                cliques[*it] = nullptr;
+            }
+            delete maxClique;
+
+            maxClique = cliqueActual;
+        } else {
+            if (maxClique != cliqueActual) {
+                for (std::list<int>::iterator it = cliqueActual->vertices.begin();
+                     it != cliqueActual->vertices.end(); ++it) {
+                    cliques[*it] = nullptr;
+                }
+                delete cliqueActual;
+            }
+        }
+    }
+    return maxClique;
+}
+
 // O(1)
 bool mejoraFrontera(Clique &clique, int vecino, std::vector<std::list<int>> &listaAdyacencias) {
     int gradoVecino = listaAdyacencias[vecino].size();
@@ -102,37 +135,7 @@ Clique* hconstructiva(std::vector<std::vector<bool>> &matrizAdyacencias,
         actual = vecinoDisponible;
     }
 
-    // Busco entre las cliques encontradas la que tenga mayor frontera y borro las otras
-    Clique *maxClique = nullptr;
-    for (int j = 0; j < n; ++j) {
-        Clique *cliqueActual = cliques[j];
-        if (cliqueActual == nullptr) continue;
-//        if (cliques[j] == nullptr){
-//            continue;
-//        }  else {
-//            std::cout << "v=" << j << ":" << *cliques[j] << std::endl;
-//        }
-        if (maxClique == nullptr) maxClique = cliqueActual;
-
-        if (maxClique->frontera < cliqueActual->frontera) {
-            for (std::list<int>::iterator it = maxClique->vertices.begin(); it != maxClique->vertices.end(); ++it) {
-                cliques[*it] = nullptr;
-            }
-            delete maxClique;
-
-            maxClique = cliqueActual;
-        } else {
-            if (maxClique != cliqueActual) {
-                for (std::list<int>::iterator it = cliqueActual->vertices.begin();
-                     it != cliqueActual->vertices.end(); ++it) {
-                    cliques[*it] = nullptr;
-                }
-                delete cliqueActual;
-            }
-        }
-    }
-
-    return maxClique;
+    return maxFrontera(n, cliques);
 }
 
 void escribirTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN, int saltarDeA){

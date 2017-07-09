@@ -5,6 +5,7 @@
 #include "cmf-algo-exacto.h"
 
 int main(int argc, char** argv) {
+    escribirTiemposVariandoNMCompleto(1, 1, 1000);
 //    escribirTiemposVariandoNSinEjes(3, 1, 1000);
 //    escribirTiemposVariandoN(3, 20, 1000);
 //    escribirTiemposVariandoM(3, 30);

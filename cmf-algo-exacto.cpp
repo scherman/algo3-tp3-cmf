@@ -152,3 +152,36 @@ void escribirTiemposVariandoNSinEjes(int cantInstanciasPorN, int minN, int maxN)
     a_file.close();
     std::cout << "Listo!" << std::endl;
 }
+
+void escribirTiemposVariandoNMCompleto(int cantInstanciasPorN, int minN, int maxN){
+    std::string nombreArchivo = "tiempos-exacto-variando-n-mcompleto";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, tiempoTotal" << std::endl;
+
+    std::cout << "Variando n: " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; ++i) {
+        int m = (i*(i-1))/2;
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique clique = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " <<  tiempoTotal << std::endl ;
+        a_file << i <<  ", " << m << ", " << tiempoTotal << std::endl;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}

@@ -9,8 +9,6 @@
 #include "Clique.h"
 #include <vector>
 
-Clique* maxFrontera(int n, Clique **cliques);
-
 Clique* randomizedGreedy(std::vector<std::vector<bool>> &matrizAdyacencias,
                          std::vector<std::list<int>> &listaAdyacencias,
                          int RCL);
