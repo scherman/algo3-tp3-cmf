@@ -8,6 +8,7 @@
 int main(int argc, char** argv) {
 //    porcentajeErrorVariandoMBusquedaLocal(20, 100, 5);
 //    escribirTiemposVariandoNBLocal(5, 20, 10000,30);
+    escribirTiemposVariandoNMVacioBLocal(20, 20, 10000,20);
 //    escribirTiemposVariandoMBLocal(10, 200, 5);
 //    fronteraEnCasoMaloBLocal(20, 1000, 20);
     
