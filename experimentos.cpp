@@ -259,6 +259,6 @@ void compararFronterasVariandoN(int cantInstanciasPorN, int minN, int maxN, int 
 int main(int argc, char** argv) {
 //    compararFronteras(3, 100, 5);
 //    compararTiemposVariandoM(3, 100, 1);
-    compararFronterasVariandoN(3, 50, 10000, 20);
+//    compararFronterasVariandoN(3, 50, 10000, 20);
     return 0;
 }

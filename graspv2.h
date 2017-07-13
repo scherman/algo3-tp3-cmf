@@ -21,6 +21,8 @@ Clique grasp2(std::vector<std::vector<bool>> &matriz,
 void variarRCL(int cantInstanciasPorRCL, int minRCL, int maxRCL, int iterations, int n, int m, int saltarDeA);
 void variarIterations(int cantInstanciasPorIterations, int minIterations, int maxIterations, int RCL, int n, int m, int saltarDeA);
 void escribirTiemposVariandoNGrasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA);
+void escribirTiemposVariandoNM0Grasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA);
+void escribirTiemposVariandoNMCompletoGrasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA);
 void escribirTiemposVariandoMGrasp(int cantInstanciasPorM, int constanteN, int RCL, int iterations, int saltarDeA);
 void porcentajeErrorVariandoMGrasp(int cantInstanciasPorM, int constanteN, int RCL, int iterations, int saltarDeA);
 

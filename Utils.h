@@ -189,6 +189,50 @@ public:
         return listaAdyacencias;
     }
 
+    static std::vector<std::list<int>> genCasoMaloGrasp(int k, int cantGEstrellas){
+
+        std::vector<std::list<int>> listaAdyacencias(cantGEstrellas*(k+1) + 2*k, std::list<int>());
+
+        // Genero grafos estrella
+        for (int j = 0; j < cantGEstrellas; ++j) {
+            // El nodo j estará conectado con los siguientes k nodos
+//            std::cout << "Adyacencias " << j << ":";
+            for(int i = j*k+j+1; i <= (j+1)*k+j; i++){
+                listaAdyacencias[j*(k+1)].push_back(i);
+                listaAdyacencias[i].push_back(j*(k+1));
+//                std::cout << " " << i;
+            }
+//            std::cout << std::endl;
+        }
+
+        //el nodoCMF1  estará conectado con los siguientes k-1 nodos
+        int nodoCMF1 = cantGEstrellas*(k+1);
+//        std::cout << "Adyacencias nodoCMF1 " << nodoCMF1 << ":";
+        for(int i = nodoCMF1 + 1; i <= nodoCMF1+k-1; i++){
+            listaAdyacencias[nodoCMF1].push_back(i);
+            listaAdyacencias[i].push_back(nodoCMF1);
+//            std::cout << " " << i;
+        }
+//        std::cout << std::endl;
+
+        //el nodoCMF1  estará conectado con los siguientes k-1 nodos
+        int nodoCMF2 = nodoCMF1 + k;
+//        std::cout << "Adyacencias nodoCMF2 " << nodoCMF2 << ":";
+        for(int i = nodoCMF2 + 1; i <= nodoCMF2+k-1; i++){
+            listaAdyacencias[nodoCMF2].push_back(i);
+            listaAdyacencias[i].push_back(nodoCMF2);
+//            std::cout << " " << i;
+        }
+//        std::cout << std::endl;
+
+        //los nodos nodoCMF1 y nodoCMF2 estarán conectados entre sí
+//        std::cout << "Conectar nodoCMF1 nodoCMF2: (" << nodoCMF1 << ", " << nodoCMF2 << ")" << std::endl;
+        listaAdyacencias[nodoCMF1].push_back(nodoCMF2);
+        listaAdyacencias[nodoCMF2].push_back(nodoCMF1);
+
+        return listaAdyacencias;
+    }
+
 private:
 
 };

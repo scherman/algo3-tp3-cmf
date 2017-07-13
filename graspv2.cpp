@@ -250,6 +250,72 @@ void escribirTiemposVariandoNGrasp(int cantInstanciasPorN, int minN, int maxN, i
     std::cout << "Listo!" << std::endl;
 }
 
+void escribirTiemposVariandoNM0Grasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA){
+    std::string nombreArchivo = "tiempos-grasp-mayor-grado-variando-n-m0";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, RCL, iterations, tiempoTotal" << std::endl;
+
+    int m = 0;
+    std::cout << "Variando n: {m=" << m << ", RCL=" << RCL << ", iterations=" << iterations << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique clique = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+        a_file << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void escribirTiemposVariandoNMCompletoGrasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA){
+    std::string nombreArchivo = "tiempos-grasp-mayor-grado-variando-n-mcompleto";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, RCL, iterations, tiempoTotal" << std::endl;
+
+    std::cout << "Variando n: {RCL=" << RCL << ", iterations=" << iterations << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+        int m = i*(i-1)/2;
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique clique = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+        a_file << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
 void escribirTiemposVariandoMGrasp(int cantInstanciasPorM, int constanteN, int RCL, int iterations, int saltarDeA){
     std::string nombreArchivo = "tiempos-grasp-mayor-grado-variando-m";
 
