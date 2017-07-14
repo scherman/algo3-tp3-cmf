@@ -204,7 +204,7 @@ void escribirTiemposVariandoMBLocal(int cantInstanciasPorM, int constanteN, int 
 
     a_file << "n, m, tiempoTotal" << std::endl;
     int maxM = (constanteN*(constanteN-1))/2;
-    int minM = 0;
+    int minM = 1;
     std::cout << "Variando m: {n=" << constanteN << "} => " << minM << " <= m <= " << maxM << std::endl;
     for (int i = minM; i <= maxM; i+=saltarDeA) {
         long long tiempoTotal = 0;
