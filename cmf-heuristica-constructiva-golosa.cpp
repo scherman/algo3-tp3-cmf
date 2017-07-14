@@ -241,3 +241,137 @@ void porcentajeErrorVariandoMHeuristicaMayorGrado(int cantInstanciasPorM, int co
     std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
 }
 
+void porcentajeErrorVariandoNCasoBuenoHeuristicaMayorGrado(int cantInstanciasPorN, int minN, int maxN, int saltarDeA){
+    std::string nombreArchivo = "prom-acierto-hconstructiva-mayor-grado-variando-n-caso-bueno";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, promedioAcierto" << std::endl;
+    long long promedioErrorGlobal = 0;
+    long long cantValores = 0;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+        long long promedioErrorTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, (i*(i-1))/2, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique *cliqueConstructiva = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
+            Clique cliqueExacto = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
+            promedioErrorTotal+= (cliqueConstructiva->frontera*100)/(cliqueExacto.frontera);
+            delete cliqueConstructiva;
+        }
+
+        promedioErrorTotal = promedioErrorTotal/ cantInstanciasPorN;
+        promedioErrorGlobal += promedioErrorTotal;
+        cantValores++;
+        std::cout << i << ", " << promedioErrorTotal << std::endl ;
+        a_file << i << ", " << promedioErrorTotal << std::endl;
+    }
+    promedioErrorGlobal = promedioErrorGlobal / cantValores;
+
+    a_file.close();
+    std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
+}
+
+void porcentajeErrorVariandoKCasoMaloHeuristicaMayorGrado(int cantInstanciasPorK, int minK, int maxK, int saltarDeA){
+    std::string nombreArchivo = "prom-acierto-hconstructiva-mayor-grado-variando-k-caso-malo";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "k, promedioAcierto" << std::endl;
+    long long promedioErrorGlobal = 0;
+    long long cantValores = 0;
+    for (int i = minK; i <= maxK; i+=saltarDeA) {
+        long long promedioErrorTotal = 0;
+        for (int j = 0; j < cantInstanciasPorK; ++j) {
+
+            std::vector<std::list<int>> listaAdyacencias = Utils::genCasoMaloBLocal(i);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique *cliqueConstructiva = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
+            Clique cliqueExacto = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
+            promedioErrorTotal+= (cliqueConstructiva->frontera*100)/(cliqueExacto.frontera);
+            delete cliqueConstructiva;
+        }
+
+        promedioErrorTotal = promedioErrorTotal/ cantInstanciasPorK;
+        promedioErrorGlobal += promedioErrorTotal;
+        cantValores++;
+        std::cout << i << ", " << promedioErrorTotal << std::endl ;
+        a_file << i << ", " << promedioErrorTotal << std::endl;
+    }
+    promedioErrorGlobal = promedioErrorGlobal / cantValores;
+
+    a_file.close();
+    std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
+}
+
+void escribirTiemposVariandoNMCompletoHConstructiva(int cantInstanciasPorN, int minN, int maxN, int saltarDeA){
+    std::string nombreArchivo = "tiempos-hconstructiva-mayor-grado-variando-n-mcompleto";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, tiempoTotal" << std::endl;
+
+//    std::cout << "Variando n: {m=" << m << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+        int m = (i*(i-1))/2;
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique *clique = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+            delete clique;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " <<  tiempoTotal << std::endl ;
+        a_file << i <<  ", " << m << ", " << tiempoTotal << std::endl;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void escribirTiemposVariandoNMVacioHConstructiva(int cantInstanciasPorN, int minN, int maxN, int saltarDeA){
+    std::string nombreArchivo = "tiempos-hconstructiva-mayor-grado-variando-n-m0";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, tiempoTotal" << std::endl;
+
+    int m = 0;
+    std::cout << "Variando n: {m=" << m << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique *clique = hconstructiva(matrizAdyacencias, listaAdyacencias, -1);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+            delete clique;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " <<  tiempoTotal << std::endl ;
+        a_file << i <<  ", " << m << ", " << tiempoTotal << std::endl;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}

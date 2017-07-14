@@ -17,25 +17,35 @@ int main(int argc, char** argv) {
 //        variarIterations(cantInstanciasPorIterations, minIterations, maxIterations, RCL, n, m, saltarDeA);
 //    }
 //    {
-//        int cantInstanciasPorN = 2, minN = 100, maxN = 10000, RCL = 3, iterations = 20, saltarDeA = 30;
+//        int cantInstanciasPorN = 2, minN = 50, maxN = 10000, RCL = 3, iterations = 20, saltarDeA = 30;
 //        escribirTiemposVariandoNGrasp(cantInstanciasPorN, minN, maxN, RCL, iterations, saltarDeA);
 //    }
 //    {
-//        int cantInstanciasPorN = 2, minN = 1, maxN = 10000, RCL = 3, iterations = 20, saltarDeA = 30;
+//        int cantInstanciasPorN = 3, minN = 1, maxN = 5000, RCL = 3, iterations = 20, saltarDeA = 40;
 //        escribirTiemposVariandoNM0Grasp(cantInstanciasPorN, minN, maxN, RCL, iterations, saltarDeA);
 //    }
 //    {
 //        int cantInstanciasPorN = 2, minN = 1, maxN = 10000, RCL = 3, iterations = 20, saltarDeA = 30;
 //        escribirTiemposVariandoNMCompletoGrasp(cantInstanciasPorN, minN, maxN, RCL, iterations, saltarDeA);
 //    }
-    {
-        int cantInstanciasPorM = 3, constanteN = 200, RCL = 3, iterations = 20, saltarDeA = 30;
-        escribirTiemposVariandoMGrasp(cantInstanciasPorM, constanteN, RCL, iterations, saltarDeA);
-    }
+//    {
+//        int cantInstanciasPorM = 3, constanteN = 150, RCL = 3, iterations = 20, saltarDeA = 40;
+//        escribirTiemposVariandoMGrasp(cantInstanciasPorM, constanteN, RCL, iterations, saltarDeA);
+//    }
 //    {
 //        int cantInstanciasPorM = 10, constanteN = 100, RCL = 3, iterations = 20, saltarDeA = 5;
 //        porcentajeErrorVariandoMGrasp(cantInstanciasPorM, constanteN, RCL, iterations, saltarDeA);
 //    }
+//    {
+//        int minK = 3, maxK=1000, RCL=3, iterations=20, step=5;
+//        porcentajeErrorVariandoKCasoMaloGraspMayorGrado(3, minK, maxK, step, RCL, iterations);
+//    }
+//    {
+//        int minN = 3, maxN=1000, RCL=3, iterations=20, step=1;
+//        porcentajeErrorVariandoNCasoBuenoGraspMayorGrado(3, minN, maxN, step, RCL, iterations);
+//    }
+
+
 
 //    int RCL = 3;
 //    int iterations = 20;

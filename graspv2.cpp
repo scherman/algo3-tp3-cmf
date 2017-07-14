@@ -15,7 +15,7 @@ class Sorter {
 public:
     Sorter(bool *usados, std::vector<std::list<int>> &lista) : usados(usados), listaAdyacencias(lista) {}
     bool operator()(const int o1, const int o2) const {
-        return (!usados[o1] && usados[o2]) || (listaAdyacencias[o1].size() > listaAdyacencias[o2].size());
+        return (!usados[o1] && usados[o2]) || (listaAdyacencias[o1].size() > listaAdyacencias[o2].size()) ;
     }
 };
 
@@ -32,9 +32,8 @@ Clique* randomizedGreedy(std::vector<std::vector<bool>> &matrizAdyacencias,
     Sorter sorter(usados, listaAdyacencias);
 
     // Agarro un nodo en RCL
-    std::sort(nodos.begin(), nodos.end(), sorter);
+    std::stable_sort(nodos.begin(), nodos.end(), sorter);
     int actual = nodos[rand() % std::min(RCL, n)];
-
 //    for (int i = 0; i < nodos.size(); ++i) {
 //        std::cout << nodos[i] << "(" << usados[nodos[i]] << ", " << listaAdyacencias[nodos[i]].size() << ") ";
 //    }
@@ -325,7 +324,7 @@ void escribirTiemposVariandoMGrasp(int cantInstanciasPorM, int constanteN, int R
 
     a_file << "n, m, RCL, iterations, tiempoTotal" << std::endl;
     int maxM = (constanteN*(constanteN-1))/2;
-    int minM = 0;
+    int minM = 1;
     std::cout << "Variando m: {n=" << constanteN << ", RCL=" << RCL << ", iterations=" << iterations << "} => " << minM << " <= m <= " << maxM << std::endl;
     for (int i = minM; i <= maxM; i+=saltarDeA) {
         long long tiempoTotal = 0;
@@ -376,6 +375,93 @@ void porcentajeErrorVariandoMGrasp(int cantInstanciasPorM, int constanteN, int R
         cantValores++;
         std::cout << constanteN << ", "<<  i << ", " << RCL << ", " << iterations << ", " << promedioErrorTotal << std::endl ;
         a_file << constanteN << ", "<< i << ", " << RCL << ", " << iterations << ", " << promedioErrorTotal << std::endl ;
+    }
+    promedioErrorGlobal = promedioErrorGlobal / cantValores;
+
+    a_file.close();
+    std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
+}
+
+void fronteraEnCasoMaloGrasp(int initK, int maxK, int RCL, int iterations, int step){
+    //Probaremos un grafo construido a partir de un número k.
+    //En todos los casos, la cmf tiene frontera 2(k-1) y el grafo tiene 3k+1 nodos
+
+    std::string nombreArchivo = "datos/frontera-grasp-variando-k-caso-malo.csv";
+    std::ofstream output(nombreArchivo);
+
+    output << "k,frontera_hallada,frontera_maxima" << endl;
+    cout << "k,frontera_hallada,frontera_maxima" << endl;
+    for(int k = initK; k <= maxK; k+= step){
+        auto listaAdyacencia = Utils::genCasoMaloGrasp(k, RCL);
+        std::vector<std::vector<bool>> matrizAdyacencias(listaAdyacencia.size(), std::vector<bool>(listaAdyacencia.size(), false));
+        Clique clique = grasp2(matrizAdyacencias, listaAdyacencia, RCL, iterations);
+        output << k << "," << clique.frontera << "," << 2*(k-1) << endl;
+        cout << k << "," << clique.frontera << "," << 2*(k-1) << endl;
+    }
+
+
+    output.close();
+
+}
+
+void porcentajeErrorVariandoNCasoBuenoGraspMayorGrado(int cantInstanciasPorN, int minN, int maxN, int saltarDeA, int RCL, int iterations){
+    std::string nombreArchivo = "prom-acierto-grasp-mayor-grado-variando-n-caso-bueno";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, promedioAcierto" << std::endl;
+    long long promedioErrorGlobal = 0;
+    long long cantValores = 0;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+        long long promedioErrorTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, (i*(i-1))/2, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique cliqueConstructiva = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            Clique cliqueExacto = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
+            promedioErrorTotal+= (cliqueConstructiva.frontera*100)/(cliqueExacto.frontera);
+        }
+
+        promedioErrorTotal = promedioErrorTotal/ cantInstanciasPorN;
+        promedioErrorGlobal += promedioErrorTotal;
+        cantValores++;
+        std::cout << i << ", " << promedioErrorTotal << std::endl ;
+        a_file << i << ", " << promedioErrorTotal << std::endl;
+    }
+    promedioErrorGlobal = promedioErrorGlobal / cantValores;
+
+    a_file.close();
+    std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
+}
+
+void porcentajeErrorVariandoKCasoMaloGraspMayorGrado(int cantInstanciasPorK, int minK, int maxK, int saltarDeA, int RCL, int iterations){
+    std::string nombreArchivo = "prom-acierto-grasp-mayor-grado-variando-k-caso-malo";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "k, promedioAcierto" << std::endl;
+    long long promedioErrorGlobal = 0;
+    long long cantValores = 0;
+    for (int i = minK; i <= maxK; i+=saltarDeA) {
+        long long promedioErrorTotal = 0;
+        for (int j = 0; j < cantInstanciasPorK; ++j) {
+
+            std::vector<std::list<int>> listaAdyacencias = Utils::genCasoMaloGrasp(i, RCL+1);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique cliqueObtenida = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            promedioErrorTotal+= (cliqueObtenida.frontera*100)/(2*(i-1));
+        }
+
+        promedioErrorTotal = promedioErrorTotal/ cantInstanciasPorK;
+        promedioErrorGlobal += promedioErrorTotal;
+        cantValores++;
+        std::cout << i << ", " << promedioErrorTotal << std::endl ;
+        a_file << i << ", " << promedioErrorTotal << std::endl;
     }
     promedioErrorGlobal = promedioErrorGlobal / cantValores;
 

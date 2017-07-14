@@ -28,4 +28,9 @@ Clique* hconstructiva(std::vector<std::vector<bool>> &matrizAdyacencias,
 void escribirTiemposVariandoN(int cantInstanciasPorN, int minN, int maxN, int saltarDeA);
 void escribirTiemposVariandoM(int cantInstanciasPorM, int constanteN, int saltarDeA);
 void porcentajeErrorVariandoMHeuristicaMayorGrado(int cantInstanciasPorM, int constanteN, int saltarDeA);
+void escribirTiemposVariandoNMCompletoHConstructiva(int cantInstanciasPorN, int minN, int maxN, int saltarDeA);
+void escribirTiemposVariandoNMVacioHConstructiva(int cantInstanciasPorN, int minN, int maxN, int saltarDeA);
+void porcentajeErrorVariandoKCasoMaloHeuristicaMayorGrado(int cantInstanciasPorK, int minK, int maxK, int saltarDeA);
+void porcentajeErrorVariandoNCasoBuenoHeuristicaMayorGrado(int cantInstanciasPorN, int minN, int maxN, int saltarDeA);
+
 #endif //TEST_DEBUGGER_CMF_HEURISTICA_CONSTRUCTIVA_GOLOSA_H

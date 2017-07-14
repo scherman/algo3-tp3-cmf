@@ -25,5 +25,6 @@ void escribirTiemposVariandoNM0Grasp(int cantInstanciasPorN, int minN, int maxN,
 void escribirTiemposVariandoNMCompletoGrasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA);
 void escribirTiemposVariandoMGrasp(int cantInstanciasPorM, int constanteN, int RCL, int iterations, int saltarDeA);
 void porcentajeErrorVariandoMGrasp(int cantInstanciasPorM, int constanteN, int RCL, int iterations, int saltarDeA);
-
+void porcentajeErrorVariandoKCasoMaloGraspMayorGrado(int cantInstanciasPorK, int minK, int maxK, int saltarDeA, int RCL, int iterations);
+void porcentajeErrorVariandoNCasoBuenoGraspMayorGrado(int cantInstanciasPorN, int minN, int maxN, int saltarDeA, int RCL, int iterations);
 #endif //TEST_DEBUGGER_GRASPV2_H
