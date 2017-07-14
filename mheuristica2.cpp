@@ -9,13 +9,13 @@
 
 int main(int argc, char** argv) {
 //    {
-//        int cantInstanciasPorRCL = 10, minRCL = 1, iterations = 1, n = 50, maxRCL = n, m = 800, saltarDeA = 1;
-//        variarRCL(cantInstanciasPorRCL, minRCL, maxRCL, iterations, n, m, saltarDeA);
+//        int cantInstanciasPorRCL = 3, minRCL = 1, iterations = 1, n = 28, maxRCL = n, saltarDeA = 1;
+//        variarRCL(cantInstanciasPorRCL, minRCL, maxRCL, iterations, n, saltarDeA);
 //    }
-//    {
-//        int cantInstanciasPorIterations = 2, minIterations = 1, maxIterations = 1000, RCL = 3, n = 50, m = 800, saltarDeA = 1;
-//        variarIterations(cantInstanciasPorIterations, minIterations, maxIterations, RCL, n, m, saltarDeA);
-//    }
+    {
+        int cantInstanciasPorIterations = 3, minIterations = 1, maxIterations = 1000, RCL = 3, n = 25, saltarDeA = 1;
+        variarIterations(cantInstanciasPorIterations, minIterations, maxIterations, RCL, n, saltarDeA);
+    }
 //    {
 //        int cantInstanciasPorN = 2, minN = 50, maxN = 10000, RCL = 3, iterations = 20, saltarDeA = 30;
 //        escribirTiemposVariandoNGrasp(cantInstanciasPorN, minN, maxN, RCL, iterations, saltarDeA);
