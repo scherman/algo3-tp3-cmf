@@ -233,6 +233,33 @@ public:
         return listaAdyacencias;
     }
 
+    static std::vector<std::list<int>> genCasoMaloHConstructivaBuenoBLocal(int nCompleto){
+        std::vector<std::list<int>> listaAdyacencias(2*nCompleto+1);
+
+        // Creo grafo estrella, donde el centro es 0 de grado nCompleto-1
+        for (int i = 1; i < nCompleto; ++i) {
+            listaAdyacencias[0].push_back(i);
+            listaAdyacencias[i].push_back(0);
+        }
+
+        // Formo un kn entre 1, n, n+1, n+2, n+3
+        for (int j = nCompleto; j < (2*nCompleto-1); ++j) {
+            listaAdyacencias[j].push_back(1);
+            listaAdyacencias[1].push_back(j);
+            for (int i = j+1; i < (2*nCompleto-1); ++i) {
+                listaAdyacencias[j].push_back(i);
+                listaAdyacencias[i].push_back(j);
+            }
+        }
+
+        // Agrego 2 adyacentes al nodo n (para que el algoritmo empiece por aca)
+        int v1 = (2*nCompleto-1), v2 = 2*nCompleto;
+        listaAdyacencias[nCompleto].insert(listaAdyacencias[nCompleto].end(), {v1, v2});
+        listaAdyacencias[v1].push_back(nCompleto);
+        listaAdyacencias[v2].push_back(nCompleto);
+        return listaAdyacencias;
+    }
+
 private:
 
 };
