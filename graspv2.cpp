@@ -10,10 +10,10 @@
 #include "cmf-algo-exacto.h"
 
 class Sorter {
-    bool *usados;
+    vector<bool> usados;
     std::vector<std::list<int>> &listaAdyacencias;
 public:
-    Sorter(bool *usados, std::vector<std::list<int>> &lista) : usados(usados), listaAdyacencias(lista) {}
+    Sorter(vector<bool> usados, std::vector<std::list<int>> &lista) : usados(usados), listaAdyacencias(lista) {}
     bool operator()(const int o1, const int o2) const {
         return (!usados[o1] && usados[o2]) || (listaAdyacencias[o1].size() > listaAdyacencias[o2].size()) ;
     }
@@ -24,8 +24,9 @@ Clique* randomizedGreedy(std::vector<std::vector<bool>> &matrizAdyacencias,
                       int RCL) {
     int n = listaAdyacencias.size();
 
-    bool usados[n] = {false};
-    Clique *cliques[n] = {nullptr};
+    vector<bool> usados(n, false);
+    vector<Clique*> cliques(n, nullptr);
+
     std::vector<int> nodos(n);
     for (int k = 0; k < n; ++k) nodos[k] = k;
 
@@ -89,7 +90,7 @@ Clique* randomizedGreedy(std::vector<std::vector<bool>> &matrizAdyacencias,
         }
     }
 
-    return maxFrontera(n, cliques);
+    return maxFrontera(n, &cliques[0]);
 }
 
 Clique grasp2(std::vector<std::vector<bool>> &matriz,
@@ -172,15 +173,18 @@ void variarIterations(int cantInstanciasPorIterations, int minIterations, int ma
     ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
     std::ofstream a_file (ss.str());
 
+    std::cout << "RCL, iterations, tiempoTotal, promedioAcierto" << std::endl;
     a_file << "RCL, iterations, tiempoTotal, promedioAcierto" << std::endl;
 
     std::vector<std::pair<std::vector<std::list<int>>, std::vector<std::vector<bool>>>> grafos (3*cantInstanciasPorIterations);
+    std::vector<int> fronteraExacta(3*cantInstanciasPorIterations);
     for (int l = 0; l < cantInstanciasPorIterations; ++l) {
         int densidad = 90;
         int m = (((n*(n-1))/2) * densidad) / 100;
         std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
         std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
         grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+        fronteraExacta[l] = exactoBTVertices(grafos[l].second, grafos[l].first).frontera;
     }
     for (int l = cantInstanciasPorIterations; l < 2*cantInstanciasPorIterations; ++l) {
         int densidad = 80;
@@ -188,6 +192,7 @@ void variarIterations(int cantInstanciasPorIterations, int minIterations, int ma
         std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
         std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
         grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+        fronteraExacta[l] = exactoBTVertices(grafos[l].second, grafos[l].first).frontera;
     }
     for (int l = 2*cantInstanciasPorIterations; l < 3*cantInstanciasPorIterations; ++l) {
         int densidad = 70;
@@ -195,27 +200,27 @@ void variarIterations(int cantInstanciasPorIterations, int minIterations, int ma
         std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
         std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
         grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+        fronteraExacta[l] = exactoBTVertices(grafos[l].second, grafos[l].first).frontera;
     }
 //    std::cout << "Variando iterations: {n = " << n << ", m=" << m << "} => " << minIterations << " <= iterations <= " << maxIterations << std::endl;
     for (int i = minIterations; i <= maxIterations; i+=saltarDeA) {
 
         long long tiempoTotal = 0;
-        long long promedioAciertoTotal = 0;
+        float promedioAciertoTotal = 0.0f;
         for (int j = 0; j < 3*cantInstanciasPorIterations; ++j) {
             {
                 std::pair<std::vector<std::list<int>>, std::vector<std::vector<bool>>> grafo = grafos[j];
-                Clique cliqueExacta = exactoBTVertices(grafo.second, grafo.first);
                 auto tpi = std::chrono::high_resolution_clock::now();
                 Clique cliqueEncontrada = grasp2(grafo.second, grafo.first, RCL, i);
                 auto tpf = std::chrono::high_resolution_clock::now();
                 auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
                 tiempoTotal += tiempo;
-                promedioAciertoTotal += (cliqueEncontrada.frontera*100)/cliqueExacta.frontera;
+                promedioAciertoTotal += (float)(cliqueEncontrada.frontera*100.0f) / (float)fronteraExacta[j];
             }
         }
 
         tiempoTotal = tiempoTotal / (3*cantInstanciasPorIterations);
-        promedioAciertoTotal= promedioAciertoTotal / (3*cantInstanciasPorIterations);
+        promedioAciertoTotal = promedioAciertoTotal / (float)(3*cantInstanciasPorIterations);
         std::cout << RCL << ", " << i << ", " << tiempoTotal << ", " << promedioAciertoTotal << std::endl;
         a_file << RCL << ", " << i<< ", " << tiempoTotal << ", " << promedioAciertoTotal << std::endl;
     }
