@@ -6,10 +6,11 @@
 #include <fstream>
 #include "stringTokenizer.hpp"
 #include "grasp.h"
+#include <algorithm>
 
 char* getCmdOption(char ** begin, char ** end, const string & option)
 {
-    char ** itr = find(begin, end, option);
+    char ** itr = std::find(begin, end, option);
     if (itr != end && ++itr != end)
     {
         return *itr;
@@ -19,7 +20,7 @@ char* getCmdOption(char ** begin, char ** end, const string & option)
 
 bool cmdOptionExists(char** begin, char** end, const string& option)
 {
-    return find(begin, end, option) != end;
+    return std::find(begin, end, option) != end;
 }
 
 int main(int argc, char** argv) {
