@@ -10,7 +10,6 @@ set(SOURCE_FILES_5 cmf-algo-exacto.h cmf-algo-exacto.cpp cmf-heuristica-construc
 
 add_executable(exacto ${SOURCE_FILES_1})
 add_executable(hconstructiva ${SOURCE_FILES_2})
-add_executable(experimentos ${SOURCE_FILES_3})
 add_executable(blocal ${SOURCE_FILES_4})
 add_executable(mheuristica ${SOURCE_FILES_5})
 

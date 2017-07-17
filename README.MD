@@ -1,4 +1,6 @@
+# Instrucciones de compilación
+
 Para correrlo:
-1. cmake CMakeLists.txt 
-2. make [problema] (donde problema es exacto, blocal, hconstructiva, mheuristica)
-3. ./[problema] grafo.txt (donde grafo.txt tiene el formato del enunciado)
+1. `cmake .` 
+2. `make`
+3. `<grafo> | ./<algoritmo>` (`exacto`/`blocal`/`hconstructiva`/`mheuristica`)
