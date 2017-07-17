@@ -1,0 +1,7 @@
+Mejorada la explićación de las heuristicas golosa constructiva y de búsqueda local
+Rehecho la metaheurística (ahora es un GRASP que usa las heurísticas previas en vez de definir las propias)
+Mejorada y Ampliada la experimentación en todos los casos.
+La experimentación está más detallada. Se explican la generación de instancias y la metodología usada en todos los casos.
+Se corrigieron detalles menores de sintaxis.
+Se ampliaron las comparaciones entre heurísticas.
+
