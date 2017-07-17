@@ -7,9 +7,34 @@
 #include "stringTokenizer.hpp"
 #include "grasp.h"
 
+char* getCmdOption(char ** begin, char ** end, const string & option)
+{
+    char ** itr = find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+        return *itr;
+    }
+    return 0;
+}
+
+bool cmdOptionExists(char** begin, char** end, const string& option)
+{
+    return find(begin, end, option) != end;
+}
+
 int main(int argc, char** argv) {
     int RCL = 3;
     int iterations = 20;
+
+    if(cmdOptionExists(argv, argv+argc, "--rcl")) {
+        char* rclOption = getCmdOption(argv, argv + argc, "--rcl");
+        RCL = stoi(rclOption);
+    }
+
+    if(cmdOptionExists(argv, argv+argc, "--iterations")) {
+        char* iterationsOption = getCmdOption(argv, argv + argc, "--iterations");
+        iterations = stoi(iterationsOption);
+    }
 
     unsigned n, m;
     stringTokenizer strTok;
