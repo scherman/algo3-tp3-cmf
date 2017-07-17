@@ -5,13 +5,6 @@
 #include "cmf-heuristica-constructiva-golosa.h"
 
 int main(int argc, char** argv) {
-//    porcentajeErrorVariandoMHeuristicaMayorGrado(10, 100, 5);
-//    escribirTiemposVariandoN(5, 20, 10000,30);
-//    escribirTiemposVariandoM(10, 100, 5);
-//    escribirTiemposVariandoNMVacioHConstructiva(3, 20, 10000,20);
-//    escribirTiemposVariandoNMCompletoHConstructiva(3, 20, 10000,20);
-//    porcentajeErrorVariandoKCasoMaloHeuristicaMayorGrado(3, 1, 1000, 5);
-//    porcentajeErrorVariandoNCasoBuenoHeuristicaMayorGrado(3, 2, 2000, 1);
     unsigned n, m;
     stringTokenizer strTok;
     string linea;

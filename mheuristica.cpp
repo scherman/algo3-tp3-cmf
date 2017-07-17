@@ -5,11 +5,11 @@
 #include "grasp.h"
 #include <fstream>
 #include "stringTokenizer.hpp"
+#include "grasp.h"
 
 int main(int argc, char** argv) {
-    int RCL = 1;
+    int RCL = 3;
     int iterations = 20;
-    int locallimite = 1000;
 
     unsigned n, m;
     stringTokenizer strTok;
@@ -40,9 +40,9 @@ int main(int argc, char** argv) {
             matrizAdyacencias[v1][v2] = true;
             matrizAdyacencias[v2][v1] = true;
         }
-        Clique cliqueMax = grasp(n, m, matrizAdyacencias, RCL, iterations, locallimite);
+        Clique cliqueMax = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
 
-        // Output
+//         Output
         std::cout << cliqueMax.frontera << " " << cliqueMax.vertices.size();
         for (std::list<int>::const_iterator it = cliqueMax.vertices.begin(); it != cliqueMax.vertices.end(); ++it) {
             std::cout << " " << *it ;

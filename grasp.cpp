@@ -1,262 +1,484 @@
+//
+// Created by jscherman on 08/07/17.
+//
+
 #include "grasp.h"
+#include "busqueda-local.h"
+#include <algorithm>
+#include <sstream>
+#include <chrono>
+#include "cmf-algo-exacto.h"
 
-using namespace std;
-
-typedef long long int64;
-//int const MAXN = 1000;
-
-
-//int adyacenciacantidad;
-//int matriz[MAXN][MAXN];
-//int x,y;
-//int mejortotal;
-
-char* getCmdOption(char ** begin, char ** end, const string & option)
-{
-    char ** itr = find(begin, end, option);
-    if (itr != end && ++itr != end)
-    {
-        return *itr;
+class Sorter {
+    vector<bool> usados;
+    std::vector<std::list<int>> &listaAdyacencias;
+public:
+    Sorter(vector<bool> usados, std::vector<std::list<int>> &lista) : usados(usados), listaAdyacencias(lista) {}
+    bool operator()(const int o1, const int o2) const {
+        return (!usados[o1] && usados[o2]) || (listaAdyacencias[o1].size() > listaAdyacencias[o2].size()) ;
     }
-    return 0;
-}
-
-bool cmdOptionExists(char** begin, char** end, const string& option)
-{
-    return find(begin, end, option) != end;
-}
-
-struct mayor
-{
-    template<class T>
-    bool operator()(T const &a, T const &b) const { return a > b; }
 };
 
-double randomizedgreedy(std::vector<std::vector<bool>> &matriz, int mejorescandidatos, int n, int m, int incluido[], int &adyacenciacantidad) //para hacer greedy normal llamarlo con el parametro en 1
-{
-    int agrandar=1;
-    for (int z=0;z<n;z++)
-    {
-        incluido[z]=false;
-    }
-    int mejortotal=0;
-    int numerodebucles=0;
-    while (agrandar==1)
-    {
-        agrandar=0;
+Clique* randomizedGreedy(std::vector<std::vector<bool>> &matrizAdyacencias,
+                      std::vector<std::list<int>> &listaAdyacencias,
+                      int RCL) {
+    int n = listaAdyacencias.size();
 
-        //criterio de seleccion en el RCL. Para armar el RCL voy a usar un sort donde ordeno la lista de elementos desde el que tiene mas nodos adyacentes al resto al que tiene menos.
-        vector <pair<int,int>> RCL;
-        for (int z=0; z<n; z++)
-        {
-            if (incluido[z]==false)
-            {
+    vector<bool> usados(n, false);
+    vector<Clique*> cliques(n, nullptr);
 
-                bool adyacenteatodos=true;
-                for (int i=0;i<n;i++)
-                {
-                    if ((incluido[i]==true)&&(matriz[i][z]==0))
-                    {
-                        adyacenteatodos=false;
-                        break;
-                    }
-                }
-                if (adyacenteatodos==true)
-                {
-                    adyacenciacantidad=0;
-                    for (int i=0;i<n;i++)
-                    {
-                        if (((incluido[i]==false)&&(i!=z))&&(matriz[i][z]==1)) adyacenciacantidad++;
+    std::vector<int> nodos(n);
+    for (int k = 0; k < n; ++k) nodos[k] = k;
 
+    Sorter sorter(usados, listaAdyacencias);
 
-                    }
-                    //ahora toca sumarle el total de la anterior y restarle una cantidad igual al numero de bucles ya que las n aristas del n clique al nuevo vertice antes formaban parte de la frotera y ahora son parte del n+1 clique
-                    adyacenciacantidad+=mejortotal;
-                    adyacenciacantidad-=numerodebucles;
-                    agrandar=1;
-                    pair<int,int> foo (adyacenciacantidad, z);
-                    RCL.push_back(foo);
-                }
+    // Agarro un nodo en RCL
+    std::stable_sort(nodos.begin(), nodos.end(), sorter);
+    int actual = nodos[rand() % std::min(RCL, n)];
+//    for (int i = 0; i < nodos.size(); ++i) {
+//        std::cout << nodos[i] << "(" << usados[nodos[i]] << ", " << listaAdyacencias[nodos[i]].size() << ") ";
+//    }
+//    std::cout << std::endl;
 
+    // Le asigno clique nueva
+    std::list<int> V;
+    V.push_back(actual);
+    usados[actual] = true;
+    cliques[actual] = new Clique(V, listaAdyacencias[actual].size());
 
+    bool hayVecinosDisponibles = true;
+    while (hayVecinosDisponibles) {
+//        std::cout << "Actual: " << actual << " | ";
+        std::list<int> &adyacentes = listaAdyacencias[actual];
+
+        // Obtener vecinosDisponibles
+        std::vector<int> vecinosDisponibles;
+        for (std::list<int>::const_iterator it = adyacentes.begin(); it != adyacentes.end(); ++it) { // O(n)
+            if (!usados[*it]) vecinosDisponibles.push_back(*it);
+        }
+
+        if (!vecinosDisponibles.empty()) {
+            // Se puede agregar otro nodo
+            Clique *cliqueActual = cliques[actual];
+
+            // Ordeno por grado y tomo uno de RCL
+            std::stable_sort(vecinosDisponibles.begin(), vecinosDisponibles.end(), sorter);
+            int vecino = vecinosDisponibles[rand() % std::min(RCL, static_cast<int>(vecinosDisponibles.size()))];
+//            for (int i = 0; i < vecinosDisponibles.size(); ++i) {
+//                std::cout << vecinosDisponibles[i] << "(" << usados[vecinosDisponibles[i]] << ", " << listaAdyacencias[vecinosDisponibles[i]].size() << ") ";
+//            }
+//            std::cout << " | Elegido(entre 0 y " << std::min(RCL, static_cast<int>(vecinosDisponibles.size())) << "): " << vecino << std::endl;
+
+            if (mejoraFrontera(*cliqueActual, vecino, listaAdyacencias) // O(1)
+                && extiendeClique(*cliqueActual, vecino, matrizAdyacencias, listaAdyacencias)) {  // O(n^2)
+                // vecinoActual esta en la clique de actual y aumenta la frontera. Lo agrego a la clique
+                extenderClique(*cliqueActual, vecino, matrizAdyacencias, listaAdyacencias); // O(n)
+                cliques[vecino] = cliqueActual;
+            } else {
+                // Le asigno una clique nueva a vecinoActual
+                std::list<int> V;
+                V.push_back(vecino);
+                Clique *cliqueNueva = new Clique(V, listaAdyacencias[vecino].size());
+                cliques[vecino] = cliqueNueva;
             }
-        }
-        if (agrandar==1)
-        {
-            sort(RCL.begin(),RCL.end(), mayor() );
-            int tamano=RCL.size();
-            int aleatorio=rand()%min(tamano,mejorescandidatos);
-            mejortotal=RCL[aleatorio].first;
-            incluido[RCL[aleatorio].second]=1;
-            numerodebucles++;
-        }
+            usados[vecino] = true;
 
+            actual = vecino;
+        } else {
+            hayVecinosDisponibles = false;
+//            std::cout << "No hay mas disponibles" << std::endl;
+        }
     }
-    return mejortotal;
+
+    return maxFrontera(n, &cliques[0]);
 }
 
-double busquedalocal(std::vector<std::vector<bool>> &matriz, int cap,int greedysolucion, int n, int m, int incluido[], int &adyacenciacantidad)
-{
-    int limite=0;
-    int modificado=1;
-    double mejortotal=greedysolucion;
-    while ((modificado==1)&&(limite<cap))
-    {
-        modificado=0;
-        int mejoreliminacion;
-        int resultadodemejoreliminacion=0;
-        int mejorswapeliminar;
-        int mejorswapagregar;
-        int resultadomejorswap=0;
-
-        //principio de la eliminacion de elementos demas. notese que si o si al eliminar se va a mantener la adyacencia a todos
-        for (int z=0;z<n;z++)
-        {
-            if (incluido[z]==true)
-            {
-                adyacenciacantidad=mejortotal;
-
-                //cuanta la cantidad de vecinos del vértice eliminado que sumaban a la frontera ya que eso reducira al total. Ademas se aumentar una cantidad igual a la cantidad de elementos del nuevo clique ya que todos esos pasan a la frontera
-                for (int i=0;i<n;i++)
-                {
-                    if ((incluido[i]==false)&&(matriz[i][z]==1)) adyacenciacantidad--;
-                }
-                //esta es la parte de aumentar por el tamaño de la frontera
-                for (int i=0;i<n;i++)
-                {
-                    if ((incluido[i]==true)&&(i!=z)) adyacenciacantidad++;
-                }
-
-                //ahora toca sumarle el total de la anterior y restarle una
-                if (adyacenciacantidad>resultadodemejoreliminacion)
-                {
-                    resultadodemejoreliminacion=adyacenciacantidad;
-                    mejoreliminacion=z;
-                }
-
-            }
-        }
-        //fin de la eliminacion de elementos demás
-        //principio del swap de 2 elementos
-
-        for (int z1=0;z1<n;z1++)
-        {
-            if (incluido[z1]==true)
-            {
-                for (int z2=0;z2<n;z2++)
-                {
-                    if (incluido[z2]==false)
-                    {
-                        bool adyacenteatodos=true;
-                        for (int i=0;i<n;i++)
-                        {
-                            if (((incluido[i]==true)&&(i!=z1))&&(matriz[i][z2]==0))
-                            {
-                                adyacenteatodos=false;
-                                break;
-                            }
-                        }
-
-                        if (adyacenteatodos==true)
-                        {
-                            adyacenciacantidad=mejortotal;
-                            //primero se calcula la cantidad de adyacentes que quedan luego de sacar un elemento
-                            //cuanta la cantidad de vecinos del vértice eliminado que sumaban a la frontera ya que eso reducira al total. Ademas se aumentar una cantidad igual a la cantidad de elementos del nuevo clique ya que todos esos pasan a la frontera
-                            for (int i=0;i<n;i++)
-                            {
-                                if ((incluido[i]==false)&&(matriz[i][z1]==1)) adyacenciacantidad--;
-                            }
-                            //esta es la parte de aumentar por el tamaño de la frontera
-                            for (int i=0;i<n;i++)
-                            {
-                                if ((incluido[i]==true)&&(i!=z1)) adyacenciacantidad++;
-                            }
-
-                            //ahora en la nueva matriz debo calcularlas aristas que añádo al agregar un elemento
-                            for (int i=0;i<n;i++)
-                            {
-                                if (((incluido[i]==false)||(i==z1))&&(matriz[i][z2]==1)) adyacenciacantidad++;
-
-                            }
-                            //debo calcular la cantidad de aristas que pasaron ahora a ser parte del clique por lo cual se debe restar
-                            for (int i=0;i<n;i++)
-                            {
-                                if (((incluido[i]==true)&&(i!=z1))&&(matriz[i][z2]==1)) adyacenciacantidad--;
-
-
-                            }
-
-
-                            if (adyacenciacantidad>resultadomejorswap)
-                            {
-                                resultadomejorswap=adyacenciacantidad;
-                                mejorswapagregar=z2;
-                                mejorswapeliminar=z1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-        //fin del swap de 2 elementos
-        if (resultadodemejoreliminacion>resultadomejorswap)
-        {
-            if (resultadodemejoreliminacion>mejortotal)
-            {
-                modificado=1;
-                incluido[mejoreliminacion]=false;
-                mejortotal=resultadodemejoreliminacion;
-            }
-        } else
-        {
-            if (resultadomejorswap>mejortotal)
-            {
-                modificado=1;
-                incluido[mejorswapeliminar]=false;
-                incluido[mejorswapagregar]=true;
-                mejortotal=resultadomejorswap;
-            }
-
-        }
-
-        limite++;
-
+Clique grasp2(std::vector<std::vector<bool>> &matriz,
+              std::vector<std::list<int>> &listaAdyacencias,
+              int RCL,
+              int iterations) {
+    Clique cmf;
+    for (int i = 0; i < iterations; ++i) {
+        Clique *candidato = randomizedGreedy(matriz, listaAdyacencias, RCL);
+        Clique candidatoMejorado = busquedaLocalExtendiendoClique(*candidato, matriz, listaAdyacencias);
+        if (candidatoMejorado.frontera > cmf.frontera) cmf = candidatoMejorado;
+        delete candidato;
     }
-    return mejortotal;
+    return cmf;
 }
 
-Clique grasp(int n, int m, std::vector<std::vector<bool>> &matriz, int RCL, int iterations, int search){
-    int const MAXN = 1000;
-    int incluido[MAXN];
-    int maxFrontera = -1;
-    vector<int> cliqueMaxFrontera;
-    int adyacenciacantidad = 0;
-    for (int it = 0; it < iterations; it++)
-    {
-        int guardado = randomizedgreedy(matriz, RCL, n, m, incluido, adyacenciacantidad);
-        int fronteraActual = busquedalocal(matriz, search,guardado,n,m, incluido, adyacenciacantidad);
+void variarRCL(int cantInstanciasPorRCL, int minRCL, int maxRCL, int iterations, int n, int saltarDeA){
+    std::string nombreArchivo = "grasp-mayor-grado-variando-rcl";
 
-        if (fronteraActual > maxFrontera)
-        {
-            cliqueMaxFrontera.clear();
-            for (int i = 0; i < n; ++i)
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "RCL, iterations, tiempoTotal, promedioAcierto" << std::endl;
+
+//    std::cout << "Variando RCL: {n = " << n << ", m=" << m << "} => " << minRCL << " <= RCL <= " << maxRCL << std::endl;
+    std::vector<std::pair<std::vector<std::list<int>>, std::vector<std::vector<bool>>>> grafos (3*cantInstanciasPorRCL);
+    for (int l = 0; l < cantInstanciasPorRCL; ++l) {
+        int densidad = 90;
+        int m = (((n*(n-1))/2) * densidad) / 100;
+        std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
+        std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+        grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+    }
+    for (int l = cantInstanciasPorRCL; l < 2*cantInstanciasPorRCL; ++l) {
+        int densidad = 80;
+        int m = (((n*(n-1))/2) * densidad) / 100;
+        std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
+        std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+        grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+    }
+    for (int l = 2*cantInstanciasPorRCL; l < 3*cantInstanciasPorRCL; ++l) {
+        int densidad = 70;
+        int m = (((n*(n-1))/2) * densidad) / 100;
+        std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
+        std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+        grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+    }
+    for (int i = minRCL; i <= maxRCL; i+=saltarDeA) {
+
+        long long tiempoTotal = 0;
+        long long promedioAciertoTotal = 0;
+        for (int j = 0; j < 3*cantInstanciasPorRCL; ++j) {
             {
-                if (incluido[i] == 1)
-                {
-                    cliqueMaxFrontera.push_back(i);
-                }
+                std::pair<std::vector<std::list<int>>, std::vector<std::vector<bool>>> grafo = grafos[j];
+                Clique cliqueExacta = exactoBTVertices(grafo.second, grafo.first);
+                auto tpi = std::chrono::high_resolution_clock::now();
+                Clique cliqueEncontrada = grasp2(grafo.second, grafo.first, i, iterations);
+                auto tpf = std::chrono::high_resolution_clock::now();
+                auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+                tiempoTotal += tiempo;
+                promedioAciertoTotal += (cliqueEncontrada.frontera*100)/cliqueExacta.frontera;
             }
-            maxFrontera = fronteraActual;
         }
+
+        tiempoTotal = tiempoTotal / (3*cantInstanciasPorRCL);
+        promedioAciertoTotal= promedioAciertoTotal / (3*cantInstanciasPorRCL);
+        std::cout << i << ", " << iterations << ", " << tiempoTotal << ", " <<  promedioAciertoTotal << std::endl;
+        a_file << i << ", " << iterations << ", " << tiempoTotal << ", " <<  promedioAciertoTotal << std::endl;
     }
 
-    std::list<int> v;
-    for (vector<int>::iterator cliqueIt = cliqueMaxFrontera.begin(); cliqueIt != cliqueMaxFrontera.end(); ++cliqueIt)
-    {
-        v.push_back(*cliqueIt);
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void variarIterations(int cantInstanciasPorIterations, int minIterations, int maxIterations, int RCL, int n, int saltarDeA){
+    std::string nombreArchivo = "grasp-mayor-grado-variando-iterations";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    std::cout << "RCL, iterations, tiempoTotal, promedioAcierto" << std::endl;
+    a_file << "RCL, iterations, tiempoTotal, promedioAcierto" << std::endl;
+
+    std::vector<std::pair<std::vector<std::list<int>>, std::vector<std::vector<bool>>>> grafos (3*cantInstanciasPorIterations);
+    std::vector<int> fronteraExacta(3*cantInstanciasPorIterations);
+    for (int l = 0; l < cantInstanciasPorIterations; ++l) {
+        int densidad = 90;
+        int m = (((n*(n-1))/2) * densidad) / 100;
+        std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
+        std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+        grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+        fronteraExacta[l] = exactoBTVertices(grafos[l].second, grafos[l].first).frontera;
     }
-    v.push_back(1);
-    return Clique(v, maxFrontera);
-};
+    for (int l = cantInstanciasPorIterations; l < 2*cantInstanciasPorIterations; ++l) {
+        int densidad = 80;
+        int m = (((n*(n-1))/2) * densidad) / 100;
+        std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
+        std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+        grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+        fronteraExacta[l] = exactoBTVertices(grafos[l].second, grafos[l].first).frontera;
+    }
+    for (int l = 2*cantInstanciasPorIterations; l < 3*cantInstanciasPorIterations; ++l) {
+        int densidad = 70;
+        int m = (((n*(n-1))/2) * densidad) / 100;
+        std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(n, m, false, 0, 0);
+        std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+        grafos[l] = make_pair(listaAdyacencias, matrizAdyacencias);
+        fronteraExacta[l] = exactoBTVertices(grafos[l].second, grafos[l].first).frontera;
+    }
+//    std::cout << "Variando iterations: {n = " << n << ", m=" << m << "} => " << minIterations << " <= iterations <= " << maxIterations << std::endl;
+    for (int i = minIterations; i <= maxIterations; i+=saltarDeA) {
+
+        long long tiempoTotal = 0;
+        float promedioAciertoTotal = 0.0f;
+        for (int j = 0; j < 3*cantInstanciasPorIterations; ++j) {
+            {
+                std::pair<std::vector<std::list<int>>, std::vector<std::vector<bool>>> grafo = grafos[j];
+                auto tpi = std::chrono::high_resolution_clock::now();
+                Clique cliqueEncontrada = grasp2(grafo.second, grafo.first, RCL, i);
+                auto tpf = std::chrono::high_resolution_clock::now();
+                auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+                tiempoTotal += tiempo;
+                promedioAciertoTotal += (float)(cliqueEncontrada.frontera*100.0f) / (float)fronteraExacta[j];
+            }
+        }
+
+        tiempoTotal = tiempoTotal / (3*cantInstanciasPorIterations);
+        promedioAciertoTotal = promedioAciertoTotal / (float)(3*cantInstanciasPorIterations);
+        std::cout << RCL << ", " << i << ", " << tiempoTotal << ", " << promedioAciertoTotal << std::endl;
+        a_file << RCL << ", " << i<< ", " << tiempoTotal << ", " << promedioAciertoTotal << std::endl;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void escribirTiemposVariandoNGrasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA){
+    std::string nombreArchivo = "tiempos-grasp-mayor-grado-variando-n";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, RCL, iterations, tiempoTotal" << std::endl;
+
+    int m = minN*(minN-1)/2;
+    std::cout << "Variando n: {m=" << m << ", RCL=" << RCL << ", iterations=" << iterations << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique clique = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+        a_file << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void escribirTiemposVariandoNM0Grasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA){
+    std::string nombreArchivo = "tiempos-grasp-mayor-grado-variando-n-m0";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, RCL, iterations, tiempoTotal" << std::endl;
+
+    int m = 0;
+    std::cout << "Variando n: {m=" << m << ", RCL=" << RCL << ", iterations=" << iterations << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique clique = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+        a_file << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void escribirTiemposVariandoNMCompletoGrasp(int cantInstanciasPorN, int minN, int maxN, int RCL, int iterations, int saltarDeA){
+    std::string nombreArchivo = "tiempos-grasp-mayor-grado-variando-n-mcompleto";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, RCL, iterations, tiempoTotal" << std::endl;
+
+    std::cout << "Variando n: {RCL=" << RCL << ", iterations=" << iterations << "} => " << minN << " <= n <= " << maxN << std::endl;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+        int m = i*(i-1)/2;
+
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, m, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique clique = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorN;
+        std::cout << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+        a_file << i << ", " << m << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void escribirTiemposVariandoMGrasp(int cantInstanciasPorM, int constanteN, int RCL, int iterations, int saltarDeA){
+    std::string nombreArchivo = "tiempos-grasp-mayor-grado-variando-m";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, RCL, iterations, tiempoTotal" << std::endl;
+    int maxM = (constanteN*(constanteN-1))/2;
+    int minM = 1;
+    std::cout << "Variando m: {n=" << constanteN << ", RCL=" << RCL << ", iterations=" << iterations << "} => " << minM << " <= m <= " << maxM << std::endl;
+    for (int i = minM; i <= maxM; i+=saltarDeA) {
+        long long tiempoTotal = 0;
+        for (int j = 0; j < cantInstanciasPorM; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(constanteN, i, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            auto tpi = std::chrono::high_resolution_clock::now();
+            Clique clique = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            auto tpf = std::chrono::high_resolution_clock::now();
+            auto tiempo = std::chrono::duration_cast<std::chrono::nanoseconds>(tpf-tpi).count();
+            tiempoTotal+= tiempo;
+        }
+
+        tiempoTotal = tiempoTotal/ cantInstanciasPorM;
+        std::cout << constanteN << ", "<<  i << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+        a_file << constanteN << ", "<<  i << ", " << RCL << ", " << iterations << ", "<< tiempoTotal << std::endl ;
+    }
+
+    a_file.close();
+    std::cout << "Listo!" << std::endl;
+}
+
+void porcentajeErrorVariandoMGrasp(int cantInstanciasPorM, int constanteN, int RCL, int iterations, int saltarDeA){
+    std::string nombreArchivo = "prom-acierto-grasp-mayor-grado-variando-m";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, m, RCL, iterations, promedioAcierto" << std::endl;
+    int maxM = (constanteN*(constanteN-1))/2;
+    int minM = 1; // Para no dividir por 0 en el promedio
+    std::cout << "Variando m: {n=" << constanteN << ", RCL=" << RCL << ", iterations=" << iterations << "} => " << minM << " <= m <= " << maxM << std::endl;
+    long long promedioErrorGlobal = 0;
+    long long cantValores = 0;
+    for (int i = minM; i <= maxM; i+=saltarDeA) {
+        long long promedioErrorTotal = 0;
+        for (int j = 0; j < cantInstanciasPorM; ++j) {
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(constanteN, i, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique cliqueObtenida = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            Clique cliqueExacto = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
+            promedioErrorTotal+= (cliqueObtenida.frontera*100)/(cliqueExacto.frontera);
+        }
+
+        promedioErrorTotal = promedioErrorTotal/ cantInstanciasPorM;
+        promedioErrorGlobal += promedioErrorTotal;
+        cantValores++;
+        std::cout << constanteN << ", "<<  i << ", " << RCL << ", " << iterations << ", " << promedioErrorTotal << std::endl ;
+        a_file << constanteN << ", "<< i << ", " << RCL << ", " << iterations << ", " << promedioErrorTotal << std::endl ;
+    }
+    promedioErrorGlobal = promedioErrorGlobal / cantValores;
+
+    a_file.close();
+    std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
+}
+
+void fronteraEnCasoMaloGrasp(int initK, int maxK, int RCL, int iterations, int step){
+    //Probaremos un grafo construido a partir de un número k.
+    //En todos los casos, la cmf tiene frontera 2(k-1) y el grafo tiene 3k+1 nodos
+
+    std::string nombreArchivo = "datos/frontera-grasp-variando-k-caso-malo.csv";
+    std::ofstream output(nombreArchivo);
+
+    output << "k,frontera_hallada,frontera_maxima" << endl;
+    cout << "k,frontera_hallada,frontera_maxima" << endl;
+    for(int k = initK; k <= maxK; k+= step){
+        auto listaAdyacencia = Utils::genCasoMaloGrasp(k, RCL);
+        std::vector<std::vector<bool>> matrizAdyacencias(listaAdyacencia.size(), std::vector<bool>(listaAdyacencia.size(), false));
+        Clique clique = grasp2(matrizAdyacencias, listaAdyacencia, RCL, iterations);
+        output << k << "," << clique.frontera << "," << 2*(k-1) << endl;
+        cout << k << "," << clique.frontera << "," << 2*(k-1) << endl;
+    }
+
+
+    output.close();
+
+}
+
+void porcentajeErrorVariandoNCasoBuenoGraspMayorGrado(int cantInstanciasPorN, int minN, int maxN, int saltarDeA, int RCL, int iterations){
+    std::string nombreArchivo = "prom-acierto-grasp-mayor-grado-variando-n-caso-bueno";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "n, promedioAcierto" << std::endl;
+    long long promedioErrorGlobal = 0;
+    long long cantValores = 0;
+    for (int i = minN; i <= maxN; i+=saltarDeA) {
+        long long promedioErrorTotal = 0;
+        for (int j = 0; j < cantInstanciasPorN; ++j) {
+
+            std::vector<std::list<int>> listaAdyacencias = Utils::generarListaAdyacencias(i, (i*(i-1))/2, false, 0, 0);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique cliqueConstructiva = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            Clique cliqueExacto = exactoBTVertices(matrizAdyacencias, listaAdyacencias);
+            promedioErrorTotal+= (cliqueConstructiva.frontera*100)/(cliqueExacto.frontera);
+        }
+
+        promedioErrorTotal = promedioErrorTotal/ cantInstanciasPorN;
+        promedioErrorGlobal += promedioErrorTotal;
+        cantValores++;
+        std::cout << i << ", " << promedioErrorTotal << std::endl ;
+        a_file << i << ", " << promedioErrorTotal << std::endl;
+    }
+    promedioErrorGlobal = promedioErrorGlobal / cantValores;
+
+    a_file.close();
+    std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
+}
+
+void porcentajeErrorVariandoKCasoMaloGraspMayorGrado(int cantInstanciasPorK, int minK, int maxK, int saltarDeA, int RCL, int iterations){
+    std::string nombreArchivo = "prom-acierto-grasp-mayor-grado-variando-k-caso-malo";
+
+    std::stringstream ss;
+    ss <<  "/home/jscherman/CLionProjects/algo3-tp3-cmf/datos/" << nombreArchivo << ".csv";
+    std::ofstream a_file (ss.str());
+
+    a_file << "k, promedioAcierto" << std::endl;
+    long long promedioErrorGlobal = 0;
+    long long cantValores = 0;
+    for (int i = minK; i <= maxK; i+=saltarDeA) {
+        long long promedioErrorTotal = 0;
+        for (int j = 0; j < cantInstanciasPorK; ++j) {
+
+            std::vector<std::list<int>> listaAdyacencias = Utils::genCasoMaloGrasp(i, RCL+1);
+            std::vector<std::vector<bool>> matrizAdyacencias = Utils::aMatrizAdyacencias(listaAdyacencias);
+            Clique cliqueObtenida = grasp2(matrizAdyacencias, listaAdyacencias, RCL, iterations);
+            promedioErrorTotal+= (cliqueObtenida.frontera*100)/(2*(i-1));
+        }
+
+        promedioErrorTotal = promedioErrorTotal/ cantInstanciasPorK;
+        promedioErrorGlobal += promedioErrorTotal;
+        cantValores++;
+        std::cout << i << ", " << promedioErrorTotal << std::endl ;
+        a_file << i << ", " << promedioErrorTotal << std::endl;
+    }
+    promedioErrorGlobal = promedioErrorGlobal / cantValores;
+
+    a_file.close();
+    std::cout << "Listo! El promedio de error global es: " <<  promedioErrorGlobal << "%" << std::endl;
+}
+
